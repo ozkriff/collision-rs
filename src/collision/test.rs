@@ -87,13 +87,13 @@ fn test_point3_collide() {
     }
 }
 
-/*mod sparse {
-    use octtree::Cube;
-    use octtree::sparse::Sparse;
+mod sparse {
+    use cgmath::aabb::Aabb3;
+    use collision::octtree::Sparse;
 
     use cgmath::point::Point3;
 
-    static size: int = 50;
+    static size: int = 5;
 
     #[test]
     fn test_insert_points()
@@ -169,14 +169,15 @@ fn test_point3_collide() {
     }
 
     #[test]
-    fn test_insert_cube()
+    fn test_insert_aabb()
     {
-        let mut oct: Sparse<f32, Cube<f32>, (int, int, int)> = Sparse::new((8*size) as f32, 8);
+        let mut oct: Sparse<f32, Aabb3<f32>, (int, int, int)> = Sparse::new((8*size) as f32, 8);
 
         for x in range(-size, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32), 1f32);
+                    let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
+                                           Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.insert(point, (x, y, z));
                 }
             }
@@ -185,7 +186,8 @@ fn test_point3_collide() {
         for x in range(-size, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32), 1f32);
+                    let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
+                                           Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.quary(&point, |_, value| {
                         assert!(*value == (x, y, z));
                     });
@@ -195,14 +197,15 @@ fn test_point3_collide() {
     }
 
     #[test]
-    fn test_remove_cube()
+    fn test_remove_aabb()
     {
-        let mut oct: Sparse<f32, Cube<f32>, (int, int, int)> = Sparse::new((8*size) as f32, 8);
+        let mut oct: Sparse<f32, Aabb3<f32>, (int, int, int)> = Sparse::new((8*size) as f32, 8);
 
         for x in range(-size, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32), 1f32);
+                    let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
+                                           Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.insert(point, (x, y, z));
                 }
             }
@@ -211,7 +214,8 @@ fn test_point3_collide() {
         for x in range(-size, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32), 1f32);
+                    let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
+                                           Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.quary(&point, |_, value| {
                         assert!(*value == (x, y, z));
                     });
@@ -222,7 +226,8 @@ fn test_point3_collide() {
         for x in range(0, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32), 1f32);
+                    let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
+                                           Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.remove(point);
                 }
             }
@@ -231,7 +236,8 @@ fn test_point3_collide() {
         for x in range(-size, size+1) {
             for y in range(-size, size+1) {
                 for z in range(-size, size+1) {
-                    let point = Cube::new(Point3::new(x as f32, y as f32, z as f32), 0.1f32);
+                    let point = Aabb3::new(Point3::new(x as f32, y as f32, z as f32),
+                                           Point3::new(x as f32 + 0.1, y as f32 + 0.1, z as f32 + 0.1));
                     oct.quary(&point, |_, value| {
                         let (x, _, _) = *value;
                         assert!(x < 0);
@@ -240,7 +246,7 @@ fn test_point3_collide() {
             }
         }
     }
-}*/
+}
 
 mod linear {
     use cgmath::aabb::Aabb3;
@@ -276,7 +282,7 @@ mod linear {
     }
 
     #[test]
-    fn test_insert_cube() {
+    fn test_insert_aabb() {
         let mut oct: Linear<f32, Aabb3<f32>, (int, int, int)> = Linear::new((5*size) as f32, 3);
 
         for x in range(-size, size+1) {

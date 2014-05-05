@@ -1,7 +1,7 @@
 use std::num::{FromPrimitive, zero};
 
 use sync::Arc;
-use cgmath::vector::Vector3;
+use cgmath::point::Point3;
 
 use CheckRange3;
 use Intersects;
@@ -10,8 +10,7 @@ struct Branch<S, K, V> {
     children: [Node<S, K, V>, ..8]
 }
 
-enum Node<S, K, V>
-{
+enum Node<S, K, V> {
     Empty,
     Data(K, V),
     Collide(Vec<(K, V)>),
@@ -24,17 +23,15 @@ pub struct Sparse<S, K, V> {
     max_depth: uint
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq, V: Clone+Send+Share> Branch<S, K, V> {
-    fn new() -> Branch<S, K, V>
-    {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Branch<S, K, V> {
+    fn new() -> Branch<S, K, V> {
         Branch {
             children: [Empty, Empty, Empty, Empty,
                        Empty, Empty, Empty, Empty]
         }
     }
 
-    fn count(&self) -> (int, int)
-    {
+    fn count(&self) -> (int, int) {
         let mut data = 0;
         let mut child = 0;
 
@@ -51,108 +48,106 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
     }
 
     #[inline(always)]
-    fn action_mut(&mut self, c: Vector3<S>, scale: S, key: &K, cb: |&mut Node<S, K, V>, Vector3<S>, S|)
-    {
+    fn action_mut(&mut self, c: Point3<S>, scale: S, key: &K, cb: |&mut Node<S, K, V>, Point3<S>, S|) {
         let hscale = scale / (FromPrimitive::from_uint(2).unwrap());
 
-        let (lt_x, gt_x) = key.check_x(&c, scale.clone());
-        let (lt_y, gt_y) = key.check_y(&c, scale.clone());
-        let (lt_z, gt_z) = key.check_z(&c, scale.clone());
+        let (lt_x, gt_x) = key.check_x(c.x, scale.clone());
+        let (lt_y, gt_y) = key.check_y(c.y, scale.clone());
+        let (lt_z, gt_z) = key.check_z(c.z, scale.clone());
 
         if lt_x && lt_y && lt_z {
             cb(&mut self.children[0],
-               Vector3::new(c.x - hscale, c.y - hscale, c.z - hscale),
+               Point3::new(c.x - hscale, c.y - hscale, c.z - hscale),
                hscale.clone());
         }
         if lt_x && lt_y && gt_z {
             cb(&mut self.children[1],
-                Vector3::new(c.x - hscale, c.y - hscale, c.z + hscale),
+                Point3::new(c.x - hscale, c.y - hscale, c.z + hscale),
                 hscale.clone());
         }
         if lt_x && gt_y && lt_z {
             cb(&mut self.children[2],
-                Vector3::new(c.x - hscale, c.y + hscale, c.z - hscale),
+                Point3::new(c.x - hscale, c.y + hscale, c.z - hscale),
                 hscale.clone());
         }
         if lt_x && gt_y && gt_z {
             cb(&mut self.children[3],
-                Vector3::new(c.x - hscale, c.y + hscale, c.z + hscale),
+                Point3::new(c.x - hscale, c.y + hscale, c.z + hscale),
                 hscale.clone());
         }
         if gt_x && lt_y && lt_z {
             cb(&mut self.children[4],
-                Vector3::new(c.x + hscale, c.y - hscale, c.z - hscale),
+                Point3::new(c.x + hscale, c.y - hscale, c.z - hscale),
                 hscale.clone());
         }
         if gt_x && lt_y && gt_z {
             cb(&mut self.children[5],
-                Vector3::new(c.x + hscale, c.y - hscale, c.z + hscale),
+                Point3::new(c.x + hscale, c.y - hscale, c.z + hscale),
                 hscale.clone());
         }
         if gt_x && gt_y && lt_z {
             cb(&mut self.children[6],
-                Vector3::new(c.x + hscale, c.y + hscale, c.z - hscale),
+                Point3::new(c.x + hscale, c.y + hscale, c.z - hscale),
                 hscale.clone());
         }
         if gt_x && gt_y && gt_z {
             cb(&mut self.children[7],
-                Vector3::new(c.x + hscale, c.y + hscale, c.z + hscale),
+                Point3::new(c.x + hscale, c.y + hscale, c.z + hscale),
                 hscale.clone());
         }
     }
 
     #[inline(always)]
-    fn action<Q: CheckRange<S>>(&self, c: Vector3<S>, scale: S, key: &Q, cb: |&Node<S, K, V>, Vector3<S>, S|)
-    {
+    fn action<Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: |&Node<S, K, V>, Point3<S>, S|) {
         let hscale = scale / (FromPrimitive::from_uint(2).unwrap());
 
-        let (lt_x, gt_x) = key.check_x(&c, scale.clone());
-        let (lt_y, gt_y) = key.check_y(&c, scale.clone());
-        let (lt_z, gt_z) = key.check_z(&c, scale.clone());
+        let (lt_x, gt_x) = key.check_x(c.x, scale.clone());
+        let (lt_y, gt_y) = key.check_y(c.y, scale.clone());
+        let (lt_z, gt_z) = key.check_z(c.z, scale.clone());
 
         if lt_x && lt_y && lt_z {
             cb(&self.children[0],
-               Vector3::new(c.x - hscale, c.y - hscale, c.z - hscale),
+               Point3::new(c.x - hscale, c.y - hscale, c.z - hscale),
                hscale.clone());
         }
         if lt_x && lt_y && gt_z {
             cb(&self.children[1],
-                Vector3::new(c.x - hscale, c.y - hscale, c.z + hscale),
+                Point3::new(c.x - hscale, c.y - hscale, c.z + hscale),
                 hscale.clone());
         }
         if lt_x && gt_y && lt_z {
             cb(&self.children[2],
-                Vector3::new(c.x - hscale, c.y + hscale, c.z - hscale),
+                Point3::new(c.x - hscale, c.y + hscale, c.z - hscale),
                 hscale.clone());
         }
         if lt_x && gt_y && gt_z {
             cb(&self.children[3],
-                Vector3::new(c.x - hscale, c.y + hscale, c.z + hscale),
+                Point3::new(c.x - hscale, c.y + hscale, c.z + hscale),
                 hscale.clone());
         }
         if gt_x && lt_y && lt_z {
             cb(&self.children[4],
-                Vector3::new(c.x + hscale, c.y - hscale, c.z - hscale),
+                Point3::new(c.x + hscale, c.y - hscale, c.z - hscale),
                 hscale.clone());
         }
         if gt_x && lt_y && gt_z {
             cb(&self.children[5],
-                Vector3::new(c.x + hscale, c.y - hscale, c.z + hscale),
+                Point3::new(c.x + hscale, c.y - hscale, c.z + hscale),
                 hscale.clone());
         }
         if gt_x && gt_y && lt_z {
             cb(&self.children[6],
-                Vector3::new(c.x + hscale, c.y + hscale, c.z - hscale),
+                Point3::new(c.x + hscale, c.y + hscale, c.z - hscale),
                 hscale.clone());
         }
         if gt_x && gt_y && gt_z {
             cb(&self.children[7],
-                Vector3::new(c.x + hscale, c.y + hscale, c.z + hscale),
+                Point3::new(c.x + hscale, c.y + hscale, c.z + hscale),
                 hscale.clone());
         }
     }
 
-    fn insert(&mut self, c: Vector3<S>, scale: S, depth: uint, key: &K, value: &V) {
+    fn insert(&mut self, c: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         self.action_mut(c, scale, key,
             |next, next_centre, next_scale| {
                 next.insert(next_centre, next_scale, depth, key, value);
@@ -160,7 +155,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
         );
     }
 
-    fn remove(&mut self, c: Vector3<S>, scale: S, key: &K) {
+    fn remove(&mut self, c: Point3<S>, scale: S, key: &K) {
         self.action_mut(c, scale, key,
             |next, next_centre, next_scale| {
                 next.remove(next_centre, next_scale, key);
@@ -168,8 +163,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
         );
     }
 
-    fn quary<Q: CheckRange<S>>(&self, c: Vector3<S>, scale: S, key: &Q, cb: |&K, &V|)
-    {
+    fn quary<Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
         self.action(c, scale, key,
             |next, next_centre, next_scale| {
                 next.quary(next_centre, next_scale, key, |k, v| { cb(k, v) });
@@ -178,10 +172,8 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
     }
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V: Clone+Send+Share> Clone for Branch<S, K, V>
-{
-    fn clone(&self) -> Branch<S, K, V>
-    {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Branch<S, K, V> {
+    fn clone(&self) -> Branch<S, K, V> {
         Branch {
             children: [
                 self.children[0].clone(), self.children[1].clone(),
@@ -193,9 +185,8 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V:
     }
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq, V: Clone+Send+Share> Sparse<S, K, V> {
-    pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V>
-    {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Sparse<S, K, V> {
+    pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V> {
         Sparse {
             scale: scale,
             root: Empty,
@@ -203,26 +194,24 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
         }
     }
 
-    pub fn insert(&mut self, key: K, value: V)
-    {
-        self.root.insert(Vector3::<S>::zero(), self.scale.clone(), self.max_depth, &key, &value)
+    pub fn insert(&mut self, key: K, value: V) {
+        self.root.insert(Point3::new(zero(), zero(), zero()),
+                         self.scale.clone(), self.max_depth, &key, &value)
     }
 
-    pub fn remove(&mut self, key: K)
-    {
-        self.root.remove(Vector3::<S>::zero(), self.scale.clone(), &key)
+    pub fn remove(&mut self, key: K) {
+        self.root.remove(Point3::new(zero(), zero(), zero()),
+                         self.scale.clone(), &key)
     }
 
-    pub fn quary<Q: CheckRange<S>>(&self, key: &Q, cb: |&K, &V|)
-    {
-        self.root.quary(Vector3::<S>::zero(), self.scale.clone(), key, cb)
+    pub fn quary<Q: CheckRange3<S>>(&self, key: &Q, cb: |&K, &V|) {
+        self.root.quary(Point3::new(zero(), zero(), zero()),
+                        self.scale.clone(), key, cb)
     }
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V: Clone+Send+Share> Clone for Sparse<S, K, V>
-{
-    fn clone(&self) -> Sparse<S, K, V>
-    {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Sparse<S, K, V> {
+    fn clone(&self) -> Sparse<S, K, V> {
         Sparse {
             scale: self.scale.clone(),
             root: self.root.clone(),
@@ -231,10 +220,8 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V:
     }
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V: Clone+Send+Share> Clone for Node<S, K, V>
-{
-    fn clone(&self) -> Node<S, K, V>
-    {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Node<S, K, V> {
+    fn clone(&self) -> Node<S, K, V> {
         match *self {
             Empty => Empty,
             Data(ref key, ref value) => Data(key.clone(), value.clone()),
@@ -244,15 +231,15 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>, V:
     }
 }
 
-impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq, V: Clone+Send+Share> Node<S, K, V> {
+impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Node<S, K, V> {
     #[inline(always)]
-    fn insert(&mut self, centre: Vector3<S>, scale: S, depth: uint, key: &K, value: &V) {
+    fn insert(&mut self, centre: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         let new = match *self {
             Empty => {
                 Data(key.clone(), value.clone())
             },
             Data(ref k, ref v) => {
-                if depth == 0 || k.collide(key) {
+                if depth == 0 || k.intersect(key) {
                     let list = vec!((k.clone(), v.clone()), (key.clone(), value.clone()));
                     Collide(list)
                 } else {
@@ -267,7 +254,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
                 let mut all_collide = true;
                 if depth != 0 {
                     for &(ref k,_) in data.iter() {
-                        if !key.collide(k) {
+                        if !key.intersect(k) {
                             all_collide = false;
                             break;
                         }
@@ -300,7 +287,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
     }
 
     #[inline(always)]
-    fn remove(&mut self, centre: Vector3<S>, scale: S, key: &K) {
+    fn remove(&mut self, centre: Point3<S>, scale: S, key: &K) {
         let new = match *self {
             Empty => Empty,
             Data(_, _) => {
@@ -333,7 +320,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange<S>+Intersects<K>+Eq,
     }
 
     #[inline(always)]
-    fn quary<Q: CheckRange<S>>(&self, centre: Vector3<S>, scale: S, key: &Q, cb: |&K, &V|) {
+    fn quary<Q: CheckRange3<S>>(&self, centre: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
         match *self {
             Empty => (),
             Data(ref key, ref v) => {

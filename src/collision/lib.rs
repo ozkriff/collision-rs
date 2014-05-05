@@ -13,15 +13,12 @@ use cgmath::aabb::{Aabb2, Aabb3};
 use cgmath::partial_ord::PartOrdPrim;
 use cgmath::approx::ApproxEq;
 
-//use linear::Linear;
-//use sparse::Sparse;
-
 mod linear;
-//mod sparse;
+mod sparse;
 
 pub mod octtree {
     pub use linear::Linear;
-    //pub use sparse::Sparse;
+    pub use sparse::Sparse;
 }
 
 pub trait Intersects<OTHER> {
