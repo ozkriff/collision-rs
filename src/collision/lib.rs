@@ -26,9 +26,9 @@ impl<S: PartOrdPrim> Intersects<Aabb3<S>> for Aabb3<S> {
     fn intersect(&self, other: &Aabb3<S>) -> bool {
         !(self.max.x < other.min.x ||
           self.max.y < other.min.y ||
-          self.max.z < other.max.z ||
+          self.max.z < other.min.z ||
           self.min.x > other.max.x ||
           self.min.y > other.max.y ||
-          self.min.z > other.min.z)
+          self.min.z > other.max.z)
     }
 }
