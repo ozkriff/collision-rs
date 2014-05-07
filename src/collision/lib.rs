@@ -19,6 +19,7 @@ mod sparse;
 pub mod octtree {
     pub use linear::Linear;
     pub use sparse::Sparse;
+    pub use sparse::CollisionIter;
 }
 
 pub trait Intersects<OTHER> {

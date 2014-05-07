@@ -1,8 +1,6 @@
 use std::mem;
 use std::num::{FromPrimitive, zero, one};
 
-use sync::Arc;
-
 use cgmath::vector::{Vector3, Vector};
 use cgmath::point::{Point3, Point};
 use cgmath::matrix::{Matrix};
@@ -15,7 +13,7 @@ enum Node<K, V> {
     Empty,
     Child,
     Data(K, V),
-    Collide(Arc<Vec<(K, V)>>)
+    Collide(Vec<(K, V)>)
 }
 
 impl<K: Clone+Send+Share, V: Clone+Send+Share> Clone for Node<K, V> {
@@ -32,7 +30,7 @@ impl<K: Clone+Send+Share, V: Clone+Send+Share> Clone for Node<K, V> {
 pub struct Linear<S, K, V> {
     scale: S,
     depth: uint,
-    data: Arc<Vec<Node<K, V>>>
+    data: Vec<Node<K, V>>
 }
 
 impl<S: Clone, K: Clone+Send+Share, V: Clone+Send+Share> Clone for Linear<S, K, V> {
@@ -115,7 +113,7 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
         Linear {
             scale: size,
             depth: depth,
-            data: Arc::new(Vec::from_fn(elements, |_| { Empty }))
+            data: Vec::from_fn(elements, |_| { Empty })
         }
     }
 
@@ -125,9 +123,9 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
                 let mut next = Empty;
-                mem::swap(&mut next, self.data.make_unique().get_mut(frame.addr(idx)));
+                mem::swap(&mut next, self.data.get_mut(frame.addr(idx)));
 
-                *self.data.make_unique().get_mut(frame.addr(idx)) = match next {
+                *self.data.get_mut(frame.addr(idx)) = match next {
                     Empty => Data(key.clone(), value.clone()),
                     Child => {
                         self._insert(frame.next(idx), key, value);
@@ -141,7 +139,7 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
                         } else {
                             let data = vec!((old_key.clone(), old_value.clone()),
                                             (key.clone(), value.clone()));
-                            Collide(Arc::new(data))
+                            Collide(data)
                         }
                     },
                     Collide(mut data) => {
@@ -149,18 +147,18 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
                             true
                         } else {
                             let mut all_collide = true;
-                            for &(ref k, _) in data.deref().iter() {
+                            for &(ref k, _) in data.iter() {
                                 all_collide &= key.intersect(k);
                             }
                             all_collide
                         };
 
                         if add_to_self {
-                            data.make_unique().push((key.clone(), value.clone()));
+                            data.push((key.clone(), value.clone()));
                             Collide(data)                               
                         } else {
                             let frame_next = frame.next(idx);
-                            for &(ref k, ref v) in data.deref().iter() {
+                            for &(ref k, ref v) in data.iter() {
                                 self._insert(frame_next.clone(), k, v);
                             }
                             self._insert(frame_next.clone(), key, value);
@@ -183,9 +181,9 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
                 let mut next = Empty;
-                mem::swap(&mut next, self.data.make_unique().get_mut(frame.addr(idx)));
+                mem::swap(&mut next, self.data.get_mut(frame.addr(idx)));
 
-                *self.data.make_unique().get_mut(frame.addr(idx)) = match next {
+                *self.data.get_mut(frame.addr(idx)) = match next {
                     Empty => Empty,
                     Child => {
                         self._remove(frame.next(idx), key);
@@ -200,7 +198,7 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
                     },
                     Collide(mut data) => {
                         let mut index = None;
-                        for (i, &(ref k, _)) in data.deref().iter().enumerate() {
+                        for (i, &(ref k, _)) in data.iter().enumerate() {
                             if *k == *key {
                                 index = Some(i);
                                 break
@@ -208,7 +206,7 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
                         }
 
                         match index {
-                            Some(i) => {data.make_unique().remove(i);},
+                            Some(i) => {data.remove(i);},
                             None => (),
                         };
 
@@ -229,12 +227,12 @@ impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Inte
 
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
-                match *self.data.deref().get(frame.addr(idx)) {
+                match *self.data.get(frame.addr(idx)) {
                     Empty => (),
                     Child => self._quary(frame.next(idx), key, |k, v| { cb(k, v) }),
                     Data(ref k, ref v) => cb(k, v),
                     Collide(ref data) => {
-                        for &(ref k, ref v) in data.deref().iter() {
+                        for &(ref k, ref v) in data.iter() {
                             cb(k, v);
                         }
                     }

@@ -1,6 +1,4 @@
 use std::num::{FromPrimitive, zero};
-
-use sync::Arc;
 use cgmath::point::Point3;
 
 use CheckRange3;
@@ -14,7 +12,7 @@ enum Node<S, K, V> {
     Empty,
     Data(K, V),
     Collide(Vec<(K, V)>),
-    Child(Arc<Branch<S, K, V>>),
+    Child(~Branch<S, K, V>),
 }
 
 pub struct Sparse<S, K, V> {
@@ -208,6 +206,15 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
         self.root.quary(Point3::new(zero(), zero(), zero()),
                         self.scale.clone(), key, cb)
     }
+
+    pub fn collision_iter<'a>(&'a self) -> CollisionIter<'a, S, K, V> {
+        CollisionIter {
+            bt: vec!(CollisionNodeIter {
+                node: &self.root,
+                index: 0
+            })
+        }
+    }
 }
 
 impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Sparse<S, K, V> {
@@ -246,7 +253,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                     let mut data = Branch::new();
                     data.insert(centre.clone(), scale.clone(), depth - 1, k, v);
                     data.insert(centre.clone(), scale.clone(), depth - 1, key, value);
-                    Child(Arc::new(data))
+                    Child(~data)
                 }
 
             },
@@ -270,13 +277,13 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                         new.insert(centre.clone(), scale.clone(), depth - 1, k, v);
                     }
                     new.insert(centre.clone(), scale.clone(), depth - 1, key, value);
-                    Child(Arc::new(new))
+                    Child(~new)
                 }
             },
             Child(ref mut child) => {
-                child.make_unique().insert(centre, scale, depth - 1, key, value);
+                child.insert(centre, scale, depth - 1, key, value);
                 
-                match child.deref().count() {
+                match child.count() {
                     (0, 0) => Empty,
                     (_, _) => return,
                 }
@@ -311,7 +318,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                 return;
             }
             Child(ref mut child) => {
-                child.make_unique().remove(centre, scale, key);
+                child.remove(centre, scale, key);
                 return;
             }
         };
@@ -332,9 +339,74 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                 }
             },
             Child(ref child) => {
-                child.deref().quary(centre, scale, key, |k, v| { cb(k, v) });
+                child.quary(centre, scale, key, |k, v| { cb(k, v) });
             }
         }
     }
 }
 
+struct CollisionNodeIter<'a, S, K, V> {
+    node: &'a Node<S, K, V>,
+    index: uint 
+}
+
+enum NodeIterData<'a, S, K, V> {
+    IterData(&'a K, &'a V),
+    IterNext(CollisionNodeIter<'a, S, K, V>),
+    IterDone
+}
+
+impl<'a, S, K, V> CollisionNodeIter<'a, S, K, V> {
+    fn next(&mut self) -> NodeIterData<'a, S, K, V> {
+        match *self.node {
+            Empty | Data(_, _) => IterDone,
+            Collide(ref dat) => {
+                let idx = self.index;
+                self.index += 1;
+                if dat.len() != idx {
+                    match dat.get(idx) { &(ref k, ref d) => IterData(k, d) }
+                } else {
+                    IterDone
+                }
+            }
+            Child(ref b) => {
+                let idx = self.index;
+                self.index += 1;
+                if idx == 8 {
+                    IterDone
+                } else {
+                    IterNext(CollisionNodeIter {
+                        node: &b.children[idx],
+                        index: 0
+                    })
+                }
+            }
+        }
+    }
+}
+
+pub struct CollisionIter<'a, S, K, V> {
+    bt: Vec<CollisionNodeIter<'a, S, K, V>>
+}
+
+impl<'a, S, K, V> Iterator<(&'a K, &'a V)> for CollisionIter<'a, S, K, V> {
+    fn next(&mut self) -> Option<(&'a K, &'a V)> {
+        loop {
+            let new = match self.bt.mut_last() {
+                Some(last) => {
+                    match last.next() {
+                        IterData(k, v) => return Some((k, v)),
+                        IterNext(next) => Some(next),
+                        IterDone => None 
+                    }
+                }
+                None => return None
+            };
+
+            match new {
+                Some(v) => self.bt.push(v),
+                None => { self.bt.pop(); }
+            }
+        }
+    }
+}
