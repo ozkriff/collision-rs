@@ -1,6 +1,7 @@
 
 extern crate cgmath;
 extern crate collision;
+extern crate collections;
 
 use collision::Intersects;
 use cgmath::aabb::{Aabb2, Aabb3};
@@ -306,5 +307,119 @@ mod linear {
                 }
             }
         }
+    }
+}
+
+mod bvh {
+    use collections::hashmap::HashSet;
+    use std::iter::range_inclusive;
+
+    use cgmath::aabb::Aabb3;
+    use cgmath::point::Point3;
+    use cgmath::vector::Vector3;
+
+    use collision::bvh::{BvhBuilder, to_morton3};
+    use collision::Intersects;
+
+    static size: int = 10;
+
+    #[test]
+    fn test_to_morton3() {
+        let base = Point3::new(0f32, 0., 0.);
+        let scale = Vector3::new(1023f32, 1023., 1023.);
+        let full = Point3::new(1f32, 1f32, 1f32);
+        let zero = Point3::new(0f32, 0f32, 0f32);
+        let half = Point3::new(0.5f32, 0.5f32, 0.5f32);
+        let x_full = Point3::new(1f32, 0f32, 0f32);
+        let y_full = Point3::new(0f32, 1f32, 0f32);
+        let z_full = Point3::new(0f32, 0f32, 1f32);
+
+        assert!(0b111_111_111_111_111_111_111_111_111_111 == to_morton3(&full, &base, &scale));
+        assert!(0b000_000_000_000_000_000_000_000_000_000 == to_morton3(&zero, &base, &scale));
+        assert!(0b000_111_111_111_111_111_111_111_111_111 == to_morton3(&half, &base, &scale));
+        assert!(0b001_001_001_001_001_001_001_001_001_001 == to_morton3(&z_full, &base, &scale));
+        assert!(0b010_010_010_010_010_010_010_010_010_010 == to_morton3(&y_full, &base, &scale));
+        assert!(0b100_100_100_100_100_100_100_100_100_100 == to_morton3(&x_full, &base, &scale));
+    }
+
+    #[test]
+    fn test_build_bvh() {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                          Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                    builder.add(aabb, (x, y, x));
+                }
+            }
+        }
+
+        let _ = builder.build();
+    }
+
+    #[test]
+    fn test_bvh_collide_all() {
+        let mut set = HashSet::new();
+
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                          Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                    builder.add(aabb, (x, y, z));
+                    set.insert((x, y, z));
+                }
+            }
+        }
+
+        let aabb = Aabb3::new(Point3::new(-size as f32, -size as f32, -size as f32),
+                              Point3::new(size as f32, size as f32, size as f32));
+
+        let bvh = builder.build();
+        for (_, dat) in bvh.collision_iter(&aabb) {
+            assert!(set.remove(dat));
+        }
+
+        assert!(set.len() == 0);
+    }
+
+    #[test]
+    fn test_bvh_collide_half() {
+        let mut set = HashSet::new();
+        let mut builder = BvhBuilder::new();
+ 
+        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+                              Point3::new(size as f32, size as f32, size as f32));
+
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                          Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                    builder.add(aabb, (x, y, z));
+                    if aabb.intersect(&check) {
+                        set.insert((x, y, z));
+                    }
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        for (_, dat) in bvh.collision_iter(&check) {
+            assert!(set.remove(dat));
+        }
+
+        assert!(set.len() == 0);
     }
 }

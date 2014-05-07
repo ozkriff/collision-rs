@@ -15,6 +15,7 @@ use cgmath::approx::ApproxEq;
 
 mod linear;
 mod sparse;
+pub mod bvh;
 
 pub mod octtree {
     pub use linear::Linear;
