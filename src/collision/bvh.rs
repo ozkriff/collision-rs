@@ -193,8 +193,6 @@ impl<'a, 'b, T> Iterator<(&'a Aabb3<f32>, &'a T)> for BvhCollisionIter<'a, 'b, T
                 }          
             }
 
-            println!("{}", aabb);
-
             let (left, right) = self.tree.children(self.bt);
             // returning from right
             if self.last == right {
