@@ -2,6 +2,7 @@
 use std::vec::Vec;
 use std::iter::range_step;
 use std::num::pow;
+use std::mem::swap;
 
 use cgmath::aabb::{Aabb, Aabb3};
 use cgmath::array::{Array, build};
@@ -14,12 +15,16 @@ use Intersects;
 pub struct BvhBuilder<T> {
     max: Point3<f32>,
     min: Point3<f32>,
-    data: Vec<(Aabb3<f32>, Option<T>)>
+    data: Vec<(Aabb3<f32>, Option<T>)>,
+    _data: Vec<(Aabb3<f32>, Option<T>)>,
+    reorder: Vec<(u32, u32)>
 }
 
 pub struct Bvh<T> {
     depth: uint,
-    data: Vec<(Aabb3<f32>, Option<T>)>
+    data: Vec<(Aabb3<f32>, Option<T>)>,
+    _data: Vec<(Aabb3<f32>, Option<T>)>,
+    reorder: Vec<(u32, u32)>
 }
 
 impl<T: Clone> BvhBuilder<T> {
@@ -27,7 +32,9 @@ impl<T: Clone> BvhBuilder<T> {
         BvhBuilder {
             max: Point3::new(0f32, 0., 0.),
             min: Point3::new(0f32, 0., 0.),
-            data: Vec::new()
+            data: Vec::new(),
+            _data: Vec::new(),
+            reorder: Vec::new()
         }
     }
 
@@ -37,65 +44,72 @@ impl<T: Clone> BvhBuilder<T> {
         self.data.push((collider.clone(), Some(data)));
     }
 
-    pub fn build(self) -> Bvh<T> {
-        let base = self.min;
-        let scale = Vector3::new(1023f32, 1023f32, 1023f32)
-                .div_v(&self.max.sub_p(&self.min));
+    pub fn build(mut self) -> Bvh<T> { 
+        let step = {
+            let base = self.min;
+            let scale = Vector3::new(1023f32, 1023f32, 1023f32)
+                    .div_v(&self.max.sub_p(&self.min));
 
-        let mut leaf: Vec<(u32, u32)> = self.data.iter().enumerate()
-                .map(|(id, &(ref aabb, _))| {
-                    (to_morton3(&aabb.center(), &base, &scale), id as u32)
+            self.reorder.truncate(0);
+            for (id, &(ref aabb, _)) in self.data.iter().enumerate() {
+                self.reorder.push((to_morton3(&aabb.center(), &base, &scale), id as u32))
+            }
+            self.reorder.sort();
+
+            self._data.truncate(0);
+            let mut reorder_iter = self.reorder.iter();
+            for idx in range(0, self.reorder.len()*2-1) {
+                self._data.push(if idx & 0x1 == 0 {
+                    let &(_, v) = reorder_iter.next().unwrap();
+                    let &(aabb, ref dat) = self.data.get(v as uint);
+                    (aabb, dat.clone())
+                } else {
+                    (Aabb3::new(Point3::new(0f32, 0., 0.),
+                                Point3::new(0f32, 0., 0.)),
+                     None)
+                });
+            }
+
+            let mut step = 1;
+            loop {
+                let reach = pow(2u, step);
+                let half_reach = pow(2u, step-1);
+
+                if reach > self._data.len() {
+                    break
                 }
-        ).collect();
 
-        leaf.sort();
-
-        let mut leaf_iter = leaf.iter();
-
-        let mut out = Vec::from_fn(leaf.len()*2-1, |idx| {
-            if idx & 0x1 == 0 {
-                let &(_, v) = leaf_iter.next().unwrap();
-                let &(aabb, ref dat) = self.data.get(v as uint);
-                (aabb, dat.clone())
-            } else {
-                (Aabb3::new(Point3::new(0f32, 0., 0.),
-                            Point3::new(0f32, 0., 0.)),
-                 None)
-            }
-        });
-
-        let mut step = 1;
-        loop {
-            let reach = pow(2u, step);
-            let half_reach = pow(2u, step-1);
-
-            if reach > out.len() {
-                break
-            }
-
-            for i in range_step(reach-1, out.len(), pow(2u, step+1)) {
-                let left = i - half_reach;
-                let mut right = i + half_reach;
-                let mut hr = half_reach;
-                while right >= out.len() {
-                    hr /= 2;
-                    right = i + hr;
+                for i in range_step(reach-1, self._data.len(), pow(2u, step+1)) {
+                    let left = i - half_reach;
+                    let mut right = i + half_reach;
+                    let mut hr = half_reach;
+                    while right >= self._data.len() {
+                        hr /= 2;
+                        right = i + hr;
+                    }
+                    let new = match (self._data.get(left), self._data.get(right)) {
+                        (&(ref left, _), &(ref right, _)) => left.merge(right)
+                    };
+                    *self._data.get_mut(i) = (new, None);
                 }
-                let new = match (out.get(left), out.get(right)) {
-                    (&(ref left, _), &(ref right, _)) => left.merge(right)
-                };
-                *out.get_mut(i) = (new, None);
+
+                step += 1;
             }
+            step
+        };
 
-            step += 1;
-        }
-
-
-
-        Bvh {
+        let mut out = Bvh {
             depth: step - 1,
-            data: out,
-        }
+            data: Vec::new(),
+            _data: Vec::new(),
+            reorder: Vec::new()
+        };
+
+        swap(&mut out.data, &mut self._data);
+        swap(&mut out._data, &mut self.data);
+        swap(&mut out.reorder, &mut self.reorder);
+
+        out
     }
 }
 
@@ -161,11 +175,22 @@ impl<T> Bvh<T> {
 
     pub fn to_builder(mut self) -> BvhBuilder<T> {
         self.data.truncate(0);
-        BvhBuilder {
+        self._data.truncate(0);
+        self.reorder.truncate(0);
+
+        let mut out = BvhBuilder {
             max: Point3::new(0f32, 0., 0.),
             min: Point3::new(0f32, 0., 0.),
-            data: self.data
-        }
+            data: Vec::new(),
+            _data: Vec::new(),
+            reorder: Vec::new()
+        };
+
+        swap(&mut out.data, &mut self.data);
+        swap(&mut out._data, &mut self._data);
+        swap(&mut out.reorder, &mut self.reorder);
+
+        out
     }
 }
 

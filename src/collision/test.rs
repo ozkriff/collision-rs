@@ -1,4 +1,5 @@
 
+extern crate test;
 extern crate cgmath;
 extern crate collision;
 extern crate collections;
@@ -321,6 +322,8 @@ mod bvh {
     use collision::bvh::{BvhBuilder, to_morton3};
     use collision::Intersects;
 
+    use test::Bencher;
+
     static size: int = 10;
 
     #[test]
@@ -421,5 +424,103 @@ mod bvh {
         }
 
         assert!(set.len() == 0);
+    }
+
+    #[bench]
+    fn bench_build(bench: &mut Bencher) {
+        bench.iter(|| {
+            let mut builder = BvhBuilder::new();
+            for x in range_inclusive(-size, size) {
+                for y in range_inclusive(-size, size) {
+                    for z in range_inclusive(-size, size) {
+                        let xf = x as f32;
+                        let yf = y as f32;
+                        let zf = z as f32;
+                        let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                              Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                        builder.add(aabb, (x, y, z));
+                    }
+                }
+            }
+            builder.build()
+        });
+    }
+
+    #[bench]
+    fn bench_build_add_only(bench: &mut Bencher) {
+        bench.iter(|| {
+            let mut builder = BvhBuilder::new();
+            for x in range_inclusive(-size, size) {
+                for y in range_inclusive(-size, size) {
+                    for z in range_inclusive(-size, size) {
+                        let xf = x as f32;
+                        let yf = y as f32;
+                        let zf = z as f32;
+                        let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                              Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                        builder.add(aabb, (x, y, z));
+                    }
+                }
+            }
+            builder
+        });
+    }
+
+    #[bench]
+    fn bench_iter_half(bench: &mut Bencher) {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                          Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                    builder.add(aabb, (x, y, z));
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+                               Point3::new(size as f32, size as f32, size as f32));
+        
+        bench.iter(|| {
+            let mut sum = 0;
+            for (_, _) in bvh.collision_iter(&check) {
+                sum += 1;
+            }
+            sum
+        });
+    }
+
+    #[bench]
+    fn bench_iter_one(bench: &mut Bencher) {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let aabb = Aabb3::new(Point3::new(xf-0.25, yf-0.25, zf-0.25),
+                                          Point3::new(zf+0.25, yf+0.25, zf+0.25));
+                    builder.add(aabb, (x, y, z));
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+                               Point3::new(1. as f32, 1. as f32, 1. as f32));
+        
+        bench.iter(|| {
+            let mut sum = 0;
+            for (_, _) in bvh.collision_iter(&check) {
+                sum += 1;
+            }
+            sum
+        });
     }
 }
