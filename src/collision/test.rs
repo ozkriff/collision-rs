@@ -319,6 +319,7 @@ mod bvh {
     use cgmath::point::Point3;
     use cgmath::vector::Vector3;
 
+    use collision::sphere::Sphere;
     use collision::aabb::Aabb3;
     use collision::bvh::{BvhBuilder, ToMorton};
     use collision::Intersects;
@@ -347,7 +348,7 @@ mod bvh {
     }
 
     #[test]
-    fn test_build_bvh() {
+    fn test_aabb_bvh_build() {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-size, size) {
             for y in range_inclusive(-size, size) {
@@ -366,7 +367,7 @@ mod bvh {
     }
 
     #[test]
-    fn test_bvh_collide_all() {
+    fn test_aabb_bvh_collide_all() {
         let mut set = HashSet::new();
 
         let mut builder = BvhBuilder::new();
@@ -396,12 +397,12 @@ mod bvh {
     }
 
     #[test]
-    fn test_bvh_collide_half() {
+    fn test_aabb_bvh_collide_half() {
         let mut set = HashSet::new();
         let mut builder = BvhBuilder::new();
  
         let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
-                              Point3::new(size as f32, size as f32, size as f32));
+                               Point3::new(size as f32, size as f32, size as f32));
 
         for x in range_inclusive(-size, size) {
             for y in range_inclusive(-size, size) {
@@ -427,8 +428,85 @@ mod bvh {
         assert!(set.len() == 0);
     }
 
+    #[test]
+    fn test_sphere_bvh_build() {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                    builder.add(sphere, (x, y, x));
+                }
+            }
+        }
+
+        let _ = builder.build();
+    }
+
+    #[test]
+    fn test_sphere_bvh_collide_all() {
+        let mut set = HashSet::new();
+
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                    builder.add(sphere, (x, y, z));
+                    set.insert((x, y, z));
+                }
+            }
+        }
+
+        let sphere = Sphere::new(Point3::new(0f32, 0f32, 0f32), ((size*size + size*size + size*size) as f32).sqrt());
+
+        let bvh = builder.build();
+        for (_, dat) in bvh.collision_iter(&sphere) {
+            assert!(set.remove(dat));
+        }
+
+        assert!(set.len() == 0);
+    }
+
+    #[test]
+    fn test_sphere_bvh_collide_half() {
+        let mut set = HashSet::new();
+        let mut builder = BvhBuilder::new();
+ 
+        let check = Sphere::new(Point3::new(0f32, 0f32, 0f32),
+                                0.5 * ((size*size + size*size + size*size) as f32).sqrt());
+
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                    builder.add(sphere, (x, y, z));
+                    if sphere.intersect(&check) {
+                        set.insert((x, y, z));
+                    }
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        for (_, dat) in bvh.collision_iter(&check) {
+            assert!(set.remove(dat));
+        }
+
+        assert!(set.len() == 0);
+    }
+
     #[bench]
-    fn bench_build(bench: &mut Bencher) {
+    fn bench_aabb_build(bench: &mut Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-size, size) {
@@ -448,7 +526,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_build_add_only(bench: &mut Bencher) {
+    fn bench_aabb_build_add_only(bench: &mut Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-size, size) {
@@ -468,7 +546,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_iter_half(bench: &mut Bencher) {
+    fn bench_aabb_iter_half(bench: &mut Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-size, size) {
             for y in range_inclusive(-size, size) {
@@ -497,7 +575,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_iter_one(bench: &mut Bencher) {
+    fn bench_aabb_iter_one(bench: &mut Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-size, size) {
             for y in range_inclusive(-size, size) {
@@ -515,6 +593,98 @@ mod bvh {
         let bvh = builder.build();
         let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
                                Point3::new(1. as f32, 1. as f32, 1. as f32));
+        
+        bench.iter(|| {
+            let mut sum = 0;
+            for (_, _) in bvh.collision_iter(&check) {
+                sum += 1;
+            }
+            sum
+        });
+    }
+
+    #[bench]
+    fn bench_sphere_build(bench: &mut Bencher) {
+        bench.iter(|| {
+            let mut builder = BvhBuilder::new();
+            for x in range_inclusive(-size, size) {
+                for y in range_inclusive(-size, size) {
+                    for z in range_inclusive(-size, size) {
+                        let xf = x as f32;
+                        let yf = y as f32;
+                        let zf = z as f32;
+                        let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                        builder.add(sphere, (x, y, z));
+                    }
+                }
+            }
+            builder.build()
+        });
+    }
+
+    #[bench]
+    fn bench_sphere_build_add_only(bench: &mut Bencher) {
+        bench.iter(|| {
+            let mut builder = BvhBuilder::new();
+            for x in range_inclusive(-size, size) {
+                for y in range_inclusive(-size, size) {
+                    for z in range_inclusive(-size, size) {
+                        let xf = x as f32;
+                        let yf = y as f32;
+                        let zf = z as f32;
+                        let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                        builder.add(sphere, (x, y, z));
+                    }
+                }
+            }
+            builder
+        });
+    }
+
+    #[bench]
+    fn bench_sphere_iter_half(bench: &mut Bencher) {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                    builder.add(sphere, (x, y, z));
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        let check = Sphere::new(Point3::new(0 as f32, 0 as f32, 0 as f32), size as f32);
+        
+        bench.iter(|| {
+            let mut sum = 0;
+            for (_, _) in bvh.collision_iter(&check) {
+                sum += 1;
+            }
+            sum
+        });
+    }
+
+    #[bench]
+    fn bench_sphere_iter_one(bench: &mut Bencher) {
+        let mut builder = BvhBuilder::new();
+        for x in range_inclusive(-size, size) {
+            for y in range_inclusive(-size, size) {
+                for z in range_inclusive(-size, size) {
+                    let xf = x as f32;
+                    let yf = y as f32;
+                    let zf = z as f32;
+                    let sphere = Sphere::new(Point3::new(xf, yf, zf), 0.25);
+                    builder.add(sphere, (x, y, z));
+                }
+            }
+        }
+
+        let bvh = builder.build();
+        let check = Sphere::new(Point3::new(0f32, 0f32, 0f32), 0.25);
         
         bench.iter(|| {
             let mut sum = 0;
