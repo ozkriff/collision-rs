@@ -1,59 +1,70 @@
 
 use std::vec::Vec;
 use std::iter::range_step;
-use std::num::pow;
+use std::num::{Zero, zero, pow, one};
+use std::num::FromPrimitive;
 use std::mem::swap;
+use std::default::Default;
 
 use cgmath::array::{Array, build};
-use cgmath::point::{Point, Point3};
-use cgmath::vector::{Vector, Vector3};
+use cgmath::point::{Point, Point2, Point3};
+use cgmath::vector::{Vector, Vector2, Vector3};
 use cgmath::partial_ord::PartOrdPrim;
 
-use {Merge, Center, Intersects};
-use aabb::{Aabb, Aabb3};
+use {Max, Min, Merge, Center, Intersects};
 
-
-pub struct BvhBuilder<T> {
-    max: Point3<f32>,
-    min: Point3<f32>,
-    data: Vec<(Aabb3<f32>, Option<T>)>,
-    _data: Vec<(Aabb3<f32>, Option<T>)>,
+pub struct BvhBuilder<T, C, P> {
+    max: P,
+    min: P,
+    data: Vec<(C, Option<T>)>,
+    _data: Vec<(C, Option<T>)>,
     reorder: Vec<(u32, u32)>
 }
 
-pub struct Bvh<T> {
+pub struct Bvh<T, C> {
     depth: uint,
-    data: Vec<(Aabb3<f32>, Option<T>)>,
-    _data: Vec<(Aabb3<f32>, Option<T>)>,
+    data: Vec<(C, Option<T>)>,
+    _data: Vec<(C, Option<T>)>,
     reorder: Vec<(u32, u32)>
 }
 
-impl<T: Clone> BvhBuilder<T> {
-    pub fn new() -> BvhBuilder<T> {
+impl
+<
+    S: PartOrdPrim + FromPrimitive,
+    V: Vector<S, Slice>,
+    P: Point<S, V, Slice> + ToMorton<P, V> + Clone,
+    Slice,
+    T: Clone,
+    C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
+> BvhBuilder<T, C, P> {
+    pub fn new() -> BvhBuilder<T, C, P> {
         BvhBuilder {
-            max: Point3::new(0f32, 0., 0.),
-            min: Point3::new(0f32, 0., 0.),
+            max: Point::origin(),
+            min: Point::origin(),
             data: Vec::new(),
             _data: Vec::new(),
             reorder: Vec::new()
         }
     }
 
-    pub fn add(&mut self, collider: Aabb3<f32>, data: T) {
-        self.min = build(|i| self.min.i(i).min(*collider.min.i(i)));
-        self.max = build(|i| self.max.i(i).max(*collider.max.i(i)));
+    pub fn add(&mut self, collider: C, data: T) {
+        let min = collider.min();
+        let max = collider.max();
+        self.min = build(|i| self.min.i(i).min(*min.i(i)));
+        self.max = build(|i| self.max.i(i).max(*max.i(i)));
         self.data.push((collider.clone(), Some(data)));
     }
 
-    pub fn build(mut self) -> Bvh<T> { 
+    pub fn build(mut self) -> Bvh<T, C> { 
         let step = {
-            let base = self.min;
-            let scale = Vector3::new(1023f32, 1023f32, 1023f32)
-                    .div_v(&self.max.sub_p(&self.min));
+            let base = self.min.clone();
+            let scale: S = FromPrimitive::from_int(1023).unwrap();
+            let unit_vector: V = one();
+            let scale = unit_vector.mul_s(scale).div_v(&self.max.sub_p(&self.min));
 
             self.reorder.truncate(0);
             for (id, &(ref aabb, _)) in self.data.iter().enumerate() {
-                self.reorder.push((to_morton3(&aabb.center(), &base, &scale), id as u32))
+                self.reorder.push((aabb.center().to_morton(&base, &scale), id as u32))
             }
             self.reorder.sort();
 
@@ -63,12 +74,10 @@ impl<T: Clone> BvhBuilder<T> {
                 self._data.push(
                     if idx & 0x1 == 0 {
                         let &(_, v) = reorder_iter.next().unwrap();
-                        let &(aabb, ref dat) = self.data.get(v as uint);
-                        (aabb, dat.clone())
+                        let &(ref aabb, ref dat) = self.data.get(v as uint);
+                        (aabb.clone(), dat.clone())
                     } else {
-                        (Aabb3::new(Point3::new(0f32, 0., 0.),
-                                    Point3::new(0f32, 0., 0.)),
-                         None)
+                        (Default::default(), None)
                     }
                 );
             }
@@ -116,25 +125,57 @@ impl<T: Clone> BvhBuilder<T> {
     }
 }
 
-pub fn to_morton3(c: &Point3<f32>, base: &Point3<f32>, scale: &Vector3<f32>) -> u32 {
-    fn to_morton(val: u32) -> u32 {
-        let mut out = 0;
-        let mut mask = 0b1;
-        let mut rotate = 0;
-        for _ in range(0, 10) {
-            out |= (val & mask) << rotate;
-            mask <<= 1;
-            rotate += 2;
-        }
-        out
-    }
-    let x = ((c.x - base.x) * scale.x) as u32;
-    let y = ((c.y - base.y) * scale.y) as u32;
-    let z = ((c.z - base.z) * scale.z) as u32;
-    ((to_morton(x)<<2) | (to_morton(y)<<1) | to_morton(z))
+pub trait ToMorton<P, V> {
+    fn to_morton(&self, b: &P, s: &V) -> u32;
 }
 
-impl<T> Bvh<T> {
+impl<S: PartOrdPrim+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
+    fn to_morton(&self, base: &Point3<S>, scale: &Vector3<S>) -> u32 {
+        fn to_morton_code(val: u32) -> u32 {
+            let mut out = 0;
+            let mut mask = 0b1;
+            let mut rotate = 0;
+            for _ in range(0, 10) {
+                out |= (val & mask) << rotate;
+                mask <<= 1;
+                rotate += 2;
+            }
+            out
+        }
+        let x: u32 = ((self.x - base.x) * scale.x).to_u32().unwrap();
+        let y: u32 = ((self.y - base.y) * scale.y).to_u32().unwrap();
+        let z: u32 = ((self.z - base.z) * scale.z).to_u32().unwrap();
+        ((to_morton_code(x)<<2) | (to_morton_code(y)<<1) | to_morton_code(z))        
+    }
+}
+
+impl<S: PartOrdPrim+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
+    fn to_morton(&self, base: &Point2<S>, scale: &Vector2<S>) -> u32 {
+        fn to_morton_code(val: u32) -> u32 {
+            let mut out = 0;
+            let mut mask = 0b1;
+            let mut rotate = 0;
+            for _ in range(0, 10) {
+                out |= (val & mask) << rotate;
+                mask <<= 1;
+                rotate += 1;
+            }
+            out
+        }
+        let x: u32 = ((self.x - base.x) * scale.x).to_u32().unwrap();
+        let y: u32 = ((self.y - base.y) * scale.y).to_u32().unwrap();
+        ((to_morton_code(x)<<1) | to_morton_code(y))        
+    }
+}
+
+impl<
+    S: PartOrdPrim + FromPrimitive,
+    V: Vector<S, Slice>,
+    P: Point<S, V, Slice> + ToMorton<P, V>,
+    Slice,
+    T: Clone,
+    C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
+> Bvh<T, C> {
     fn depth(&self, idx: uint) -> uint {
         let mut depth = 0;
         let mut mask = 0b1;
@@ -166,7 +207,7 @@ impl<T> Bvh<T> {
         (left, right)
     }
 
-    pub fn collision_iter<'a, 'b>(&'a self, collider: &'b Aabb3<f32>) -> BvhCollisionIter<'a, 'b, T> {
+    pub fn collision_iter<'a, 'b>(&'a self, collider: &'b C) -> BvhCollisionIter<'a, 'b, T, C> {
         BvhCollisionIter {
             bt: pow(2u, self.depth) - 1,
             last: pow(2u, self.depth+1),
@@ -176,14 +217,14 @@ impl<T> Bvh<T> {
         }
     }
 
-    pub fn to_builder(mut self) -> BvhBuilder<T> {
+    pub fn to_builder(mut self) -> BvhBuilder<T, C, P> {
         self.data.truncate(0);
         self._data.truncate(0);
         self.reorder.truncate(0);
 
         let mut out = BvhBuilder {
-            max: Point3::new(0f32, 0., 0.),
-            min: Point3::new(0f32, 0., 0.),
+            max: Point::origin(),
+            min: Point::origin(),
             data: Vec::new(),
             _data: Vec::new(),
             reorder: Vec::new()
@@ -197,16 +238,24 @@ impl<T> Bvh<T> {
     }
 }
 
-pub struct BvhCollisionIter<'a, 'b, T> {
-    tree: &'a Bvh<T>,
+pub struct BvhCollisionIter<'a, 'b, T, C> {
+    tree: &'a Bvh<T, C>,
     bt: uint,
     last: uint,
     parent: Vec<uint>,
-    collider: &'b Aabb3<f32>
+    collider: &'b C
 }
 
-impl<'a, 'b, T> Iterator<(&'a Aabb3<f32>, &'a T)> for BvhCollisionIter<'a, 'b, T> {
-    fn next(&mut self) -> Option<(&'a Aabb3<f32>, &'a T)> {
+impl<
+    'a, 'b,
+    T: Clone,
+    S: PartOrdPrim + FromPrimitive,
+    V: Vector<S, Slice>,
+    P: Point<S, V, Slice> + ToMorton<P, V>,
+    Slice,
+    C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
+> Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, 'b, T, C> {
+    fn next(&mut self) -> Option<(&'a C, &'a T)> {
         loop {
             let &(ref aabb, ref dat) = self.tree.data.get(self.bt);
 

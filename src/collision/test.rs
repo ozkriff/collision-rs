@@ -320,7 +320,7 @@ mod bvh {
     use cgmath::vector::Vector3;
 
     use collision::aabb::Aabb3;
-    use collision::bvh::{BvhBuilder, to_morton3};
+    use collision::bvh::{BvhBuilder, ToMorton};
     use collision::Intersects;
 
     use test::Bencher;
@@ -338,12 +338,12 @@ mod bvh {
         let y_full = Point3::new(0f32, 1f32, 0f32);
         let z_full = Point3::new(0f32, 0f32, 1f32);
 
-        assert!(0b111_111_111_111_111_111_111_111_111_111 == to_morton3(&full, &base, &scale));
-        assert!(0b000_000_000_000_000_000_000_000_000_000 == to_morton3(&zero, &base, &scale));
-        assert!(0b000_111_111_111_111_111_111_111_111_111 == to_morton3(&half, &base, &scale));
-        assert!(0b001_001_001_001_001_001_001_001_001_001 == to_morton3(&z_full, &base, &scale));
-        assert!(0b010_010_010_010_010_010_010_010_010_010 == to_morton3(&y_full, &base, &scale));
-        assert!(0b100_100_100_100_100_100_100_100_100_100 == to_morton3(&x_full, &base, &scale));
+        assert!(0b111_111_111_111_111_111_111_111_111_111 == full.to_morton(&base, &scale));
+        assert!(0b000_000_000_000_000_000_000_000_000_000 == zero.to_morton(&base, &scale));
+        assert!(0b000_111_111_111_111_111_111_111_111_111 == half.to_morton(&base, &scale));
+        assert!(0b001_001_001_001_001_001_001_001_001_001 == z_full.to_morton(&base, &scale));
+        assert!(0b010_010_010_010_010_010_010_010_010_010 == y_full.to_morton(&base, &scale));
+        assert!(0b100_100_100_100_100_100_100_100_100_100 == x_full.to_morton(&base, &scale));
     }
 
     #[test]

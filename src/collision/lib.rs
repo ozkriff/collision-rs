@@ -31,6 +31,14 @@ pub trait Center<P> {
     fn center(&self) -> P;
 }
 
+pub trait Max<P> {
+    fn max(&self) -> P;
+}
+
+pub trait Min<P> {
+    fn min(&self) -> P;
+}
+
 pub trait Merge {
     fn merge(&self, &Self) -> Self;
 }
