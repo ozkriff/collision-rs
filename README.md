@@ -9,4 +9,5 @@ collison-rs can be build with the following steps
 ```
 ./configure
 make
+make check
 ```

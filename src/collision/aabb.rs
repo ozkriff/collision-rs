@@ -15,13 +15,17 @@
 
 //! Axis-aligned bounding boxes
 
+use std::fmt;
+use std::num::{zero, one};
+use std::iter::{FromIterator, Iterator};
+
 use cgmath::point::{Point, Point2, Point3};
 use cgmath::vector::{Vector, Vector2, Vector3};
 use cgmath::array::build;
 use cgmath::partial_ord::PartOrdPrim;
-use std::fmt;
-use std::num::{zero, one};
-use std::iter::{FromIterator, Iterator};
+use cgmath::approx::ApproxEq;
+
+use {Center, Merge, Intersects, CheckRange2, CheckRange3};
 
 pub trait Aabb
 <
@@ -35,10 +39,6 @@ pub trait Aabb
     fn max<'a>(&'a self) -> &'a P;
     #[inline] fn dim(&self) -> V { self.max().sub_p(self.min()) }
     #[inline] fn volume(&self) -> S { self.dim().comp_mul() }
-    #[inline] fn center(&self) -> P {
-        let two = one::<S>() + one::<S>();
-        self.min().add_v(&self.dim().div_s(two))
-    }
 
     // Tests whether a point is cointained in the box, inclusive for min corner
     // and exclusive for the max corner.
@@ -66,12 +66,6 @@ pub trait Aabb
     fn mul_v(&self, v: &V) -> Self {
         let min : P = Point::from_vec(&self.min().to_vec().mul_v(v));
         let max : P = Point::from_vec(&self.max().to_vec().mul_v(v));
-        Aabb::new(min, max)
-    }
-
-    fn merge(&self, o: &Self) -> Self {
-        let min : P = build(|i| self.min().i(i).min(*o.min().i(i)));
-        let max : P = build(|i| self.max().i(i).max(*o.max().i(i)));
         Aabb::new(min, max)
     }
 }
@@ -182,6 +176,89 @@ impl<S: PartOrdPrim> FromIterator<Point3<S>> for Aabb3<S> {
             min.y = min.y.min(point.y);
             min.z = min.z.min(point.z);
         }
+
+        Aabb3 {
+            min: min,
+            max: max
+        }
+    }
+}
+
+impl<S: Float+ApproxEq<S>> CheckRange2<S> for Aabb3<S> {
+    fn check_x(&self, centre: S, _: S) -> (bool, bool) {
+        (self.min.x <= centre,
+         self.max.x > centre)
+    }
+
+    fn check_y(&self, centre: S, _: S) -> (bool, bool) {
+        (self.min.y <= centre,
+         self.max.y > centre)
+    }
+}
+
+impl<S: Float+ApproxEq<S>> CheckRange3<S> for Aabb3<S> {
+    fn check_z(&self, centre: S, _: S) -> (bool, bool) {
+        (self.min.z <= centre,
+         self.max.z > centre)
+    }
+}
+
+impl<S: PartOrdPrim> Intersects<Aabb2<S>> for Aabb2<S> {
+    fn intersect(&self, other: &Aabb2<S>) -> bool {
+        !(self.max.x < other.min.x ||
+          self.max.y < other.min.y ||
+          self.min.x > other.max.x ||
+          self.min.y > other.max.y)
+    }
+}
+
+impl<S: PartOrdPrim> Intersects<Aabb3<S>> for Aabb3<S> {
+    fn intersect(&self, other: &Aabb3<S>) -> bool {
+        !(self.max.x < other.min.x ||
+          self.max.y < other.min.y ||
+          self.max.z < other.min.z ||
+          self.min.x > other.max.x ||
+          self.min.y > other.max.y ||
+          self.min.z > other.max.z)
+    }
+}
+
+impl<S: PartOrdPrim> Center<Point2<S>> for Aabb2<S> {
+    fn center(&self) -> Point2<S> {
+        let two = one::<S>() + one::<S>();
+        self.min().add_v(&self.dim().div_s(two))
+    }
+}
+
+impl<S: PartOrdPrim> Center<Point3<S>> for Aabb3<S> {
+    fn center(&self) -> Point3<S> {
+        let two = one::<S>() + one::<S>();
+        self.min().add_v(&self.dim().div_s(two))
+    }
+}
+
+impl<S: PartOrdPrim> Merge for Aabb2<S> {
+    fn merge(&self, other: &Aabb2<S>) -> Aabb2<S> {
+        let max = Point2::new(self.max.x.max(other.max.x),
+                              self.max.y.max(other.max.y));
+        let min = Point2::new(self.min.x.min(other.min.x),
+                              self.min.y.min(other.min.y));
+
+        Aabb2 {
+            min: min,
+            max: max
+        }
+    }
+}
+
+impl<S: PartOrdPrim> Merge for Aabb3<S> {
+    fn merge(&self, other: &Aabb3<S>) -> Aabb3<S> {
+        let max = Point3::new(self.max.x.max(other.max.x),
+                              self.max.y.max(other.max.y),
+                              self.max.z.max(other.max.z));
+        let min = Point3::new(self.min.x.min(other.min.x),
+                              self.min.y.min(other.min.y),
+                              self.min.z.min(other.min.z));
 
         Aabb3 {
             min: min,

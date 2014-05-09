@@ -9,7 +9,7 @@ use cgmath::point::{Point, Point3};
 use cgmath::vector::{Vector, Vector3};
 use cgmath::partial_ord::PartOrdPrim;
 
-use Intersects;
+use {Merge, Center, Intersects};
 use aabb::{Aabb, Aabb3};
 
 
@@ -60,15 +60,17 @@ impl<T: Clone> BvhBuilder<T> {
             self._data.truncate(0);
             let mut reorder_iter = self.reorder.iter();
             for idx in range(0, self.reorder.len()*2-1) {
-                self._data.push(if idx & 0x1 == 0 {
-                    let &(_, v) = reorder_iter.next().unwrap();
-                    let &(aabb, ref dat) = self.data.get(v as uint);
-                    (aabb, dat.clone())
-                } else {
-                    (Aabb3::new(Point3::new(0f32, 0., 0.),
-                                Point3::new(0f32, 0., 0.)),
-                     None)
-                });
+                self._data.push(
+                    if idx & 0x1 == 0 {
+                        let &(_, v) = reorder_iter.next().unwrap();
+                        let &(aabb, ref dat) = self.data.get(v as uint);
+                        (aabb, dat.clone())
+                    } else {
+                        (Aabb3::new(Point3::new(0f32, 0., 0.),
+                                    Point3::new(0f32, 0., 0.)),
+                         None)
+                    }
+                );
             }
 
             let mut step = 1;
