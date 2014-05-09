@@ -4,13 +4,14 @@ use std::iter::range_step;
 use std::num::pow;
 use std::mem::swap;
 
-use cgmath::aabb::{Aabb, Aabb3};
 use cgmath::array::{Array, build};
 use cgmath::point::{Point, Point3};
 use cgmath::vector::{Vector, Vector3};
 use cgmath::partial_ord::PartOrdPrim;
 
 use Intersects;
+use aabb::{Aabb, Aabb3};
+
 
 pub struct BvhBuilder<T> {
     max: Point3<f32>,

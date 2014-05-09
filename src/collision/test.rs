@@ -5,7 +5,8 @@ extern crate collision;
 extern crate collections;
 
 use collision::Intersects;
-use cgmath::aabb::{Aabb2, Aabb3};
+use collision::aabb::{Aabb2, Aabb3};
+
 use cgmath::point::{Point, Point2, Point3};
 use cgmath::vector::{Vector3, Vector2};
 
@@ -90,7 +91,7 @@ fn test_point3_collide() {
 }
 
 mod sparse {
-    use cgmath::aabb::Aabb3;
+    use collision::aabb::Aabb3;
     use collision::octtree::Sparse;
 
     use cgmath::point::Point3;
@@ -251,7 +252,7 @@ mod sparse {
 }
 
 mod linear {
-    use cgmath::aabb::Aabb3;
+    use collision::aabb::Aabb3;
     use collision::octtree::Linear;
 
     use cgmath::point::Point3;
@@ -315,10 +316,10 @@ mod bvh {
     use collections::hashmap::HashSet;
     use std::iter::range_inclusive;
 
-    use cgmath::aabb::Aabb3;
     use cgmath::point::Point3;
     use cgmath::vector::Vector3;
 
+    use collision::aabb::Aabb3;
     use collision::bvh::{BvhBuilder, to_morton3};
     use collision::Intersects;
 

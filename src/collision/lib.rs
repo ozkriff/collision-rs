@@ -9,13 +9,15 @@ extern crate sync;
 extern crate cgmath;
 
 use cgmath::point::{Point2, Point3};
-use cgmath::aabb::{Aabb2, Aabb3};
 use cgmath::partial_ord::PartOrdPrim;
 use cgmath::approx::ApproxEq;
+
+use aabb::{Aabb, Aabb2, Aabb3};
 
 mod linear;
 mod sparse;
 pub mod bvh;
+pub mod aabb;
 
 pub mod octtree {
     pub use linear::Linear;
