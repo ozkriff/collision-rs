@@ -12,7 +12,7 @@ enum Node<S, K, V> {
     Empty,
     Data(K, V),
     Collide(Vec<(K, V)>),
-    Child(~Branch<S, K, V>),
+    Child(Box<Branch<S, K, V>>),
 }
 
 pub struct Sparse<S, K, V> {
@@ -253,7 +253,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                     let mut data = Branch::new();
                     data.insert(centre.clone(), scale.clone(), depth - 1, k, v);
                     data.insert(centre.clone(), scale.clone(), depth - 1, key, value);
-                    Child(~data)
+                    Child(box data)
                 }
 
             },
@@ -277,7 +277,7 @@ impl<S: Float+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq
                         new.insert(centre.clone(), scale.clone(), depth - 1, k, v);
                     }
                     new.insert(centre.clone(), scale.clone(), depth - 1, key, value);
-                    Child(~new)
+                    Child(box new)
                 }
             },
             Child(ref mut child) => {

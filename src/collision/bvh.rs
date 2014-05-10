@@ -1,7 +1,7 @@
 
 use std::vec::Vec;
 use std::iter::range_step;
-use std::num::{Zero, zero, pow, one};
+use std::num::{pow, one};
 use std::num::FromPrimitive;
 use std::mem::swap;
 use std::default::Default;
