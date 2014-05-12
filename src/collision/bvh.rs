@@ -56,7 +56,7 @@ impl
     }
 
     pub fn build(mut self) -> Bvh<T, C> { 
-        let step = {
+        let step = if self.data.len() != 0 {
             let base = self.min.clone();
             let scale: S = FromPrimitive::from_int(1023).unwrap();
             let unit_vector: V = one();
@@ -108,6 +108,11 @@ impl
                 step += 1;
             }
             step
+        } else {
+            self.data.truncate(0);
+            self.reorder.truncate(0);
+            self._data.truncate(0);
+            0
         };
 
         let mut out = Bvh {
