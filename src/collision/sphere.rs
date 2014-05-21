@@ -116,6 +116,6 @@ impl<S: PartOrdPrim+PartOrdFloat<S>> FromIterator<Point3<S>> for Sphere<S> {
 
 impl<S: fmt::Show> fmt::Show for Sphere<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f.buf, "[{} - {}]", self.center, self.radius)
+        write!(f, "[{} - {}]", self.center, self.radius)
     }
 }
