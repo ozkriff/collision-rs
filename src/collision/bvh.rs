@@ -6,10 +6,9 @@ use std::num::FromPrimitive;
 use std::mem::swap;
 use std::default::Default;
 
-use cgmath::array::{Array, build};
 use cgmath::point::{Point, Point2, Point3};
 use cgmath::vector::{Vector, Vector2, Vector3};
-use cgmath::partial_ord::PartOrdPrim;
+use cgmath::num::BaseNum;
 
 use {Max, Min, Merge, Center, Intersects};
 
@@ -30,10 +29,9 @@ pub struct Bvh<T, C> {
 
 impl
 <
-    S: PartOrdPrim + FromPrimitive,
-    V: Vector<S, Slice>,
-    P: Point<S, V, Slice> + ToMorton<P, V> + Clone,
-    Slice,
+    S: BaseNum + FromPrimitive,
+    V: Vector<S>,
+    P: Point<S, V> + ToMorton<P, V> + Clone,
     T: Clone,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
 > BvhBuilder<T, C, P> {
@@ -50,8 +48,8 @@ impl
     pub fn add(&mut self, collider: C, data: T) {
         let min = collider.min();
         let max = collider.max();
-        self.min = build(|i| self.min.i(i).min(*min.i(i)));
-        self.max = build(|i| self.max.i(i).max(*max.i(i)));
+        self.min = self.min.min(&min);
+        self.max = self.max.max(&max);
         self.data.push((collider.clone(), Some(data)));
     }
 
@@ -134,7 +132,7 @@ pub trait ToMorton<P, V> {
     fn to_morton(&self, b: &P, s: &V) -> u32;
 }
 
-impl<S: PartOrdPrim+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
+impl<S: BaseNum+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
     fn to_morton(&self, base: &Point3<S>, scale: &Vector3<S>) -> u32 {
         fn to_morton_code(val: u32) -> u32 {
             let mut out = 0;
@@ -154,7 +152,7 @@ impl<S: PartOrdPrim+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
     }
 }
 
-impl<S: PartOrdPrim+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
+impl<S: BaseNum+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
     fn to_morton(&self, base: &Point2<S>, scale: &Vector2<S>) -> u32 {
         fn to_morton_code(val: u32) -> u32 {
             let mut out = 0;
@@ -174,10 +172,9 @@ impl<S: PartOrdPrim+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
 }
 
 impl<
-    S: PartOrdPrim + FromPrimitive,
-    V: Vector<S, Slice>,
-    P: Point<S, V, Slice> + ToMorton<P, V>,
-    Slice,
+    S: BaseNum + FromPrimitive,
+    V: Vector<S>,
+    P: Point<S, V> + ToMorton<P, V>,
     T: Clone,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
 > Bvh<T, C> {
@@ -254,10 +251,9 @@ pub struct BvhCollisionIter<'a, 'b, T, C> {
 impl<
     'a, 'b,
     T: Clone,
-    S: PartOrdPrim + FromPrimitive,
-    V: Vector<S, Slice>,
-    P: Point<S, V, Slice> + ToMorton<P, V>,
-    Slice,
+    S: BaseNum + FromPrimitive,
+    V: Vector<S>,
+    P: Point<S, V> + ToMorton<P, V>,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
 > Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, 'b, T, C> {
     fn next(&mut self) -> Option<(&'a C, &'a T)> {

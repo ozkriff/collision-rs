@@ -9,7 +9,7 @@ extern crate sync;
 extern crate cgmath;
 
 use cgmath::point::{Point2, Point3};
-use cgmath::partial_ord::PartOrdPrim;
+use cgmath::num::BaseNum;
 
 mod linear;
 mod sparse;
@@ -73,14 +73,14 @@ pub trait CheckRange3<S: Clone>: CheckRange2<S> {
     }
 }
 
-impl<S: PartOrdPrim> Intersects<Point2<S>> for Point2<S> {
+impl<S: BaseNum> Intersects<Point2<S>> for Point2<S> {
     fn intersect(&self, other: &Point2<S>) -> bool {
         self.x == other.x &&
         self.y == other.y
     }
 }
 
-impl<S: PartOrdPrim> Intersects<Point3<S>> for Point3<S> {
+impl<S: BaseNum> Intersects<Point3<S>> for Point3<S> {
     fn intersect(&self, other: &Point3<S>) -> bool {
         self.x == other.x &&
         self.y == other.y &&

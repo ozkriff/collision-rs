@@ -4,7 +4,7 @@ use std::num::{FromPrimitive, zero, one};
 use cgmath::vector::{Vector3, Vector};
 use cgmath::point::{Point3, Point};
 use cgmath::matrix::{Matrix};
-use cgmath::partial_ord::PartOrdPrim;
+use cgmath::num::BaseNum;
 
 use CheckRange3;
 use Intersects;
@@ -68,7 +68,7 @@ struct Frame<S> {
 }
 
 
-impl<S: Float+FromPrimitive+PartOrdPrim> Frame<S> {
+impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     fn start(depth: uint, scale: S) -> Frame<S> {
         Frame {
             centre: Point3::new(zero(), zero(), zero()),
@@ -105,7 +105,7 @@ impl<S: Float+FromPrimitive+PartOrdPrim> Frame<S> {
     }
 }
 
-impl<S: Float+FromPrimitive+PartOrdPrim, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Linear<S, K, V> {
+impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Linear<S, K, V> {
     pub fn new(size: S, depth: uint) -> Linear<S, K, V> {
         assert!(depth != 0);
         let elements = calc_size(depth);
