@@ -22,18 +22,16 @@ use std::default::Default;
 
 use cgmath::point::{Point, Point2, Point3};
 use cgmath::vector::{Vector, Vector2, Vector3};
-use cgmath::array::build;
-use cgmath::partial_ord::PartOrdPrim;
+use cgmath::num::BaseNum;
 use cgmath::approx::ApproxEq;
 
 use {Max, Min, Center, Merge, Intersects, CheckRange2, CheckRange3};
 
 pub trait Aabb
 <
-    S: PartOrdPrim,
-    V: Vector<S, Slice>,
-    P: Point<S, V, Slice>,
-    Slice
+    S: BaseNum,
+    V: Vector<S>,
+    P: Point<S, V>
 > {
     fn new(p1: P, p2: P) -> Self;
     fn aabb_min<'a>(&'a self) -> &'a P;
@@ -43,15 +41,12 @@ pub trait Aabb
 
     // Tests whether a point is cointained in the box, inclusive for min corner
     // and exclusive for the max corner.
-    #[inline] fn contains(&self, p: &P) -> bool {
-        p.sub_p(self.aabb_min()).iter().all(|x| *x >= zero::<S>()) &&
-        self.aabb_max().sub_p(p).iter().all(|x| *x > zero::<S>())
-    }
+    fn contains(&self, p: &P) -> bool;
 
     // Returns a new AABB that is grown to include the given point.
     fn grow(&self, p: &P) -> Self {
-        let min : P = build(|i| self.aabb_min().i(i).min(*p.i(i)));
-        let max : P = build(|i| self.aabb_max().i(i).max(*p.i(i)));
+        let min = self.aabb_min().min(p);
+        let max = self.aabb_max().max(p);
         Aabb::new(min, max)
     }
 
@@ -77,32 +72,40 @@ pub struct Aabb2<S> {
     pub max: Point2<S>,
 }
 
-impl<S: PartOrdPrim> Aabb2<S> {
+impl<S: BaseNum> Aabb2<S> {
     /// Construct a new axis-aligned bounding box from two points.
     #[inline]
     pub fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> {
         Aabb2 {
-            min: Point2::new(p1.x.min(p2.x),
-                             p1.y.min(p2.y)),
-            max: Point2::new(p1.x.max(p2.x),
-                             p1.y.max(p2.y)),
+            min: Point2::new(p1.x.partial_min(p2.x),
+                             p1.y.partial_min(p2.y)),
+            max: Point2::new(p1.x.partial_max(p2.x),
+                             p1.y.partial_max(p2.y)),
         }
     }
 }
 
-impl<S: PartOrdPrim> Aabb<S, Vector2<S>, Point2<S>, [S, ..2]> for Aabb2<S> {
+impl<S: BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
     fn new(p1: Point2<S>, p2: Point2<S>) -> Aabb2<S> { Aabb2::new(p1, p2) }
     #[inline] fn aabb_min<'a>(&'a self) -> &'a Point2<S> { &self.min }
     #[inline] fn aabb_max<'a>(&'a self) -> &'a Point2<S> { &self.max }
+
+    #[inline]
+    fn contains(&self, p: &Point2<S>) -> bool {
+        let v_min = p.sub_p(self.aabb_min());
+        let v_max = self.aabb_max().sub_p(p);
+        v_min.x >= zero() && v_min.y >= zero() &&
+        v_max.x >  zero() && v_max.y >  zero()
+    }
 }
 
-impl<S: fmt::Show> fmt::Show for Aabb2<S> {
+impl<S: fmt::Show+BaseNum> fmt::Show for Aabb2<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{} - {}]", self.min, self.max)
     }
 }
 
-impl<S: PartOrdPrim> FromIterator<Point2<S>> for Aabb2<S> {
+impl<S: BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
     fn from_iter<T: Iterator<Point2<S>>>(iterator: T) -> Aabb2<S> {
         let mut iterator = iterator;
 
@@ -113,10 +116,10 @@ impl<S: PartOrdPrim> FromIterator<Point2<S>> for Aabb2<S> {
         };
 
         for point in iterator {
-            max.x = max.x.max(point.x);
-            max.y = max.y.max(point.y);
-            min.x = min.x.min(point.x);
-            min.y = min.y.min(point.y);
+            max.x = max.x.partial_max(point.x);
+            max.y = max.y.partial_max(point.y);
+            min.x = min.x.partial_min(point.x);
+            min.y = min.y.partial_min(point.y);
         }
 
         Aabb2 {
@@ -132,34 +135,42 @@ pub struct Aabb3<S> {
     pub max: Point3<S>,
 }
 
-impl<S: PartOrdPrim> Aabb3<S> {
+impl<S: BaseNum> Aabb3<S> {
     /// Construct a new axis-aligned bounding box from two points.
     #[inline]
     pub fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> {
         Aabb3 {
-            min: Point3::new(p1.x.min(p2.x),
-                             p1.y.min(p2.y),
-                             p1.z.min(p2.z)),
-            max: Point3::new(p1.x.max(p2.x),
-                             p1.y.max(p2.y),
-                             p1.z.max(p2.z)),
+            min: Point3::new(p1.x.partial_min(p2.x),
+                             p1.y.partial_min(p2.y),
+                             p1.z.partial_min(p2.z)),
+            max: Point3::new(p1.x.partial_max(p2.x),
+                             p1.y.partial_max(p2.y),
+                             p1.z.partial_max(p2.z)),
         }
     }
 }
 
-impl<S: PartOrdPrim> Aabb<S, Vector3<S>, Point3<S>, [S, ..3]> for Aabb3<S> {
+impl<S: BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
     fn new(p1: Point3<S>, p2: Point3<S>) -> Aabb3<S> { Aabb3::new(p1, p2) }
     #[inline] fn aabb_min<'a>(&'a self) -> &'a Point3<S> { &self.min }
     #[inline] fn aabb_max<'a>(&'a self) -> &'a Point3<S> { &self.max }
+
+    #[inline]
+    fn contains(&self, p: &Point3<S>) -> bool {
+        let v_min = p.sub_p(self.aabb_min());
+        let v_max = self.aabb_max().sub_p(p);
+        v_min.x >= zero() && v_min.y >= zero() && v_min.z >= zero() &&
+        v_max.x >  zero() && v_max.y >  zero() && v_max.z >  zero()
+    }
 }
 
-impl<S: fmt::Show> fmt::Show for Aabb3<S> {
+impl<S: fmt::Show+BaseNum> fmt::Show for Aabb3<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{} - {}]", self.min, self.max)
     }
 }
 
-impl<S: PartOrdPrim> FromIterator<Point3<S>> for Aabb3<S> {
+impl<S: BaseNum> FromIterator<Point3<S>> for Aabb3<S> {
     fn from_iter<T: Iterator<Point3<S>>>(iterator: T) -> Aabb3<S> {
         let mut iterator = iterator;
 
@@ -170,12 +181,12 @@ impl<S: PartOrdPrim> FromIterator<Point3<S>> for Aabb3<S> {
         };
 
         for point in iterator {
-            max.x = max.x.max(point.x);
-            max.y = max.y.max(point.y);
-            max.z = max.z.max(point.z);
-            min.x = min.x.min(point.x);
-            min.y = min.y.min(point.y);
-            min.z = min.z.min(point.z);
+            max.x = max.x.partial_max(point.x);
+            max.y = max.y.partial_max(point.y);
+            max.z = max.z.partial_max(point.z);
+            min.x = min.x.partial_min(point.x);
+            min.y = min.y.partial_min(point.y);
+            min.z = min.z.partial_min(point.z);
         }
 
         Aabb3 {
@@ -204,7 +215,7 @@ impl<S: Float+ApproxEq<S>> CheckRange3<S> for Aabb3<S> {
     }
 }
 
-impl<S: PartOrdPrim> Intersects<Aabb2<S>> for Aabb2<S> {
+impl<S: BaseNum> Intersects<Aabb2<S>> for Aabb2<S> {
     fn intersect(&self, other: &Aabb2<S>) -> bool {
         !(self.max.x < other.min.x ||
           self.max.y < other.min.y ||
@@ -213,7 +224,7 @@ impl<S: PartOrdPrim> Intersects<Aabb2<S>> for Aabb2<S> {
     }
 }
 
-impl<S: PartOrdPrim> Intersects<Aabb3<S>> for Aabb3<S> {
+impl<S: BaseNum> Intersects<Aabb3<S>> for Aabb3<S> {
     fn intersect(&self, other: &Aabb3<S>) -> bool {
         !(self.max.x < other.min.x ||
           self.max.y < other.min.y ||
@@ -224,50 +235,50 @@ impl<S: PartOrdPrim> Intersects<Aabb3<S>> for Aabb3<S> {
     }
 }
 
-impl<S: PartOrdPrim> Center<Point2<S>> for Aabb2<S> {
+impl<S: BaseNum> Center<Point2<S>> for Aabb2<S> {
     fn center(&self) -> Point2<S> {
         let two = one::<S>() + one::<S>();
         self.aabb_min().add_v(&self.dim().div_s(two))
     }
 }
 
-impl<S: PartOrdPrim> Center<Point3<S>> for Aabb3<S> {
+impl<S: BaseNum> Center<Point3<S>> for Aabb3<S> {
     fn center(&self) -> Point3<S> {
         let two = one::<S>() + one::<S>();
         self.aabb_min().add_v(&self.dim().div_s(two))
     }
 }
 
-impl<S: PartOrdPrim> Max<Point2<S>> for Aabb2<S> {
+impl<S: BaseNum> Max<Point2<S>> for Aabb2<S> {
     fn max(&self) -> Point2<S> {
         self.max.clone()
     }
 }
 
-impl<S: PartOrdPrim> Max<Point3<S>> for Aabb3<S> {
+impl<S: BaseNum> Max<Point3<S>> for Aabb3<S> {
     fn max(&self) -> Point3<S> {
         self.max.clone()
     }
 }
 
-impl<S: PartOrdPrim> Min<Point2<S>> for Aabb2<S> {
+impl<S: BaseNum> Min<Point2<S>> for Aabb2<S> {
     fn min(&self) -> Point2<S> {
         self.max.clone()
     }
 }
 
-impl<S: PartOrdPrim> Min<Point3<S>> for Aabb3<S> {
+impl<S: BaseNum> Min<Point3<S>> for Aabb3<S> {
     fn min(&self) -> Point3<S> {
         self.min.clone()
     }
 }
 
-impl<S: PartOrdPrim> Merge for Aabb2<S> {
+impl<S: BaseNum> Merge for Aabb2<S> {
     fn merge(&self, other: &Aabb2<S>) -> Aabb2<S> {
-        let max = Point2::new(self.max.x.max(other.max.x),
-                              self.max.y.max(other.max.y));
-        let min = Point2::new(self.min.x.min(other.min.x),
-                              self.min.y.min(other.min.y));
+        let max = Point2::new(self.max.x.partial_max(other.max.x),
+                              self.max.y.partial_max(other.max.y));
+        let min = Point2::new(self.min.x.partial_min(other.min.x),
+                              self.min.y.partial_min(other.min.y));
 
         Aabb2 {
             min: min,
@@ -276,14 +287,14 @@ impl<S: PartOrdPrim> Merge for Aabb2<S> {
     }
 }
 
-impl<S: PartOrdPrim> Merge for Aabb3<S> {
+impl<S: BaseNum> Merge for Aabb3<S> {
     fn merge(&self, other: &Aabb3<S>) -> Aabb3<S> {
-        let max = Point3::new(self.max.x.max(other.max.x),
-                              self.max.y.max(other.max.y),
-                              self.max.z.max(other.max.z));
-        let min = Point3::new(self.min.x.min(other.min.x),
-                              self.min.y.min(other.min.y),
-                              self.min.z.min(other.min.z));
+        let max = Point3::new(self.max.x.partial_max(other.max.x),
+                              self.max.y.partial_max(other.max.y),
+                              self.max.z.partial_max(other.max.z));
+        let min = Point3::new(self.min.x.partial_min(other.min.x),
+                              self.min.y.partial_min(other.min.y),
+                              self.min.z.partial_min(other.min.z));
 
         Aabb3 {
             min: min,
@@ -292,7 +303,7 @@ impl<S: PartOrdPrim> Merge for Aabb3<S> {
     }
 }
 
-impl<S: PartOrdPrim> Default for Aabb3<S> {
+impl<S: BaseNum> Default for Aabb3<S> {
     fn default() -> Aabb3<S> {
         Aabb3 {
             min: Point::origin(),
@@ -301,7 +312,7 @@ impl<S: PartOrdPrim> Default for Aabb3<S> {
     }
 }
 
-impl<S: PartOrdPrim> Default for Aabb2<S> {
+impl<S: BaseNum> Default for Aabb2<S> {
     fn default() -> Aabb2<S> {
         Aabb2 {
             min: Point::origin(),

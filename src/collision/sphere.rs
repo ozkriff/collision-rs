@@ -5,7 +5,7 @@ use std::default::Default;
 
 use cgmath::point::{Point, Point3};
 use cgmath::vector::{EuclideanVector, Vector, Vector3};
-use cgmath::partial_ord::{PartOrdPrim, PartOrdFloat};
+use cgmath::num::{BaseNum, BaseFloat};
 
 use {Merge, Center, Intersects, Max, Min};
 
@@ -24,7 +24,7 @@ impl<S> Sphere<S> {
     }
 }
 
-impl<S: PartOrdPrim+PartOrdFloat<S>+fmt::Show> Merge for Sphere<S> {
+impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Sphere<S> {
     fn merge(&self, other: &Sphere<S>) -> Sphere<S> {
         let diff = other.center.sub_p(&self.center);
         let dist = diff.length();
@@ -52,7 +52,7 @@ impl<S: Clone> Center<Point3<S>> for Sphere<S> {
     }
 }
 
-impl<S: PartOrdPrim+PartOrdFloat<S>> Intersects<Sphere<S>> for Sphere<S> {
+impl<S: BaseNum+BaseFloat> Intersects<Sphere<S>> for Sphere<S> {
     fn intersect(&self, other: &Sphere<S>) -> bool {
         let diff = self.center.sub_p(&other.center);
         let dist = diff.length();
@@ -61,7 +61,7 @@ impl<S: PartOrdPrim+PartOrdFloat<S>> Intersects<Sphere<S>> for Sphere<S> {
     }
 }
 
-impl<S: PartOrdPrim> Default for Sphere<S> {
+impl<S: BaseNum+BaseFloat> Default for Sphere<S> {
     fn default() -> Sphere<S> {
         Sphere {
             center: Point::origin(),
@@ -70,21 +70,21 @@ impl<S: PartOrdPrim> Default for Sphere<S> {
     }
 }
 
-impl<S: PartOrdPrim+PartOrdFloat<S>> Max<Point3<S>> for Sphere<S> {
+impl<S: BaseNum+BaseFloat> Max<Point3<S>> for Sphere<S> {
     fn max(&self) -> Point3<S> {
         let unit = Vector3::new(self.radius, self.radius, self.radius);
         self.center.add_v(&unit)
     }
 }
 
-impl<S: PartOrdPrim+PartOrdFloat<S>> Min<Point3<S>> for Sphere<S> {
+impl<S: BaseNum+BaseFloat> Min<Point3<S>> for Sphere<S> {
     fn min(&self) -> Point3<S> {
         let unit = Vector3::new(-self.radius, -self.radius, -self.radius);
         self.center.add_v(&unit)
     }
 }
 
-impl<S: PartOrdPrim+PartOrdFloat<S>> FromIterator<Point3<S>> for Sphere<S> {
+impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
     fn from_iter<T: Iterator<Point3<S>>>(iterator: T) -> Sphere<S> {
         let mut iterator = iterator;
 
@@ -114,7 +114,7 @@ impl<S: PartOrdPrim+PartOrdFloat<S>> FromIterator<Point3<S>> for Sphere<S> {
     }
 }
 
-impl<S: fmt::Show> fmt::Show for Sphere<S> {
+impl<S: fmt::Show+BaseNum> fmt::Show for Sphere<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{} - {}]", self.center, self.radius)
     }
