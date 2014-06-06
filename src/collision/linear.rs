@@ -105,7 +105,7 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     }
 }
 
-impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Linear<S, K, V> {
+impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Linear<S, K, V> {
     pub fn new(size: S, depth: uint) -> Linear<S, K, V> {
         assert!(depth != 0);
         let elements = calc_size(depth);

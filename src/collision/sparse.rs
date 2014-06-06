@@ -22,7 +22,7 @@ pub struct Sparse<S, K, V> {
     max_depth: uint
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Branch<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Branch<S, K, V> {
     fn new() -> Branch<S, K, V> {
         Branch {
             children: [Empty, Empty, Empty, Empty,
@@ -184,7 +184,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>,
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Sparse<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Sparse<S, K, V> {
     pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V> {
         Sparse {
             scale: scale,
@@ -239,7 +239,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>,
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+Eq, V: Clone+Send+Share> Node<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Node<S, K, V> {
     #[inline(always)]
     fn insert(&mut self, centre: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         let new = match *self {
