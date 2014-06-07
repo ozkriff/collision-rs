@@ -313,7 +313,7 @@ mod linear {
 }
 
 mod bvh {
-    use collections::hashmap::HashSet;
+    use std::collections::HashSet;
     use std::iter::range_inclusive;
 
     use cgmath::point::Point3;
