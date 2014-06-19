@@ -172,7 +172,8 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersec
 
     pub fn insert(&mut self, key: K, value: V) {
         let scale = self.scale.clone();
-        self._insert(Frame::start(self.depth, scale), &key, &value);
+        let depth = self.depth.clone();
+        self._insert(Frame::start(depth, scale), &key, &value);
     }
 
     fn _remove(&mut self, frame: Frame<S>, key: &K) {
@@ -219,7 +220,8 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersec
 
     pub fn remove(&mut self, key: K) {
         let scale = self.scale.clone();
-        self._remove(Frame::start(self.depth, scale), &key);
+        let depth = self.depth.clone();
+        self._remove(Frame::start(depth, scale), &key);
     }
 
     fn _quary<Q: CheckRange3<S>>(&self, frame: Frame<S>, key: &Q, cb: |&K, &V|) {
