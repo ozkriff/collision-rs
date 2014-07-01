@@ -138,7 +138,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
             let mut out = 0;
             let mut mask = 0b1;
             let mut rotate = 0;
-            for _ in range(0, 10) {
+            for _ in range(0i, 10) {
                 out |= (val & mask) << rotate;
                 mask <<= 1;
                 rotate += 2;
@@ -158,7 +158,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
             let mut out = 0;
             let mut mask = 0b1;
             let mut rotate = 0;
-            for _ in range(0, 10) {
+            for _ in range(0i, 10) {
                 out |= (val & mask) << rotate;
                 mask <<= 1;
                 rotate += 1;
