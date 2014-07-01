@@ -401,7 +401,7 @@ mod bvh {
         let mut set = HashSet::new();
         let mut builder = BvhBuilder::new();
  
-        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+        let check = Aabb3::new(Point3::new(0. as f32, 0. as f32, 0. as f32),
                                Point3::new(size as f32, size as f32, size as f32));
 
         for x in range_inclusive(-size, size) {
@@ -562,11 +562,11 @@ mod bvh {
         }
 
         let bvh = builder.build();
-        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+        let check = Aabb3::new(Point3::new(0. as f32, 0. as f32, 0. as f32),
                                Point3::new(size as f32, size as f32, size as f32));
         
         bench.iter(|| {
-            let mut sum = 0;
+            let mut sum = 0i;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -591,11 +591,11 @@ mod bvh {
         }
 
         let bvh = builder.build();
-        let check = Aabb3::new(Point3::new(0 as f32, 0 as f32, 0 as f32),
+        let check = Aabb3::new(Point3::new(0. as f32, 0. as f32, 0. as f32),
                                Point3::new(1. as f32, 1. as f32, 1. as f32));
         
         bench.iter(|| {
-            let mut sum = 0;
+            let mut sum = 0i;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -657,10 +657,10 @@ mod bvh {
         }
 
         let bvh = builder.build();
-        let check = Sphere::new(Point3::new(0 as f32, 0 as f32, 0 as f32), size as f32);
+        let check = Sphere::new(Point3::new(0. as f32, 0. as f32, 0. as f32), size as f32);
         
         bench.iter(|| {
-            let mut sum = 0;
+            let mut sum = 0i;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -687,7 +687,7 @@ mod bvh {
         let check = Sphere::new(Point3::new(0f32, 0f32, 0f32), 0.25);
         
         bench.iter(|| {
-            let mut sum = 0;
+            let mut sum = 0i;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
