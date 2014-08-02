@@ -1,0 +1,7 @@
+[package]
+name = "collision"
+version = "0.0.1"
+authors = ["Colin Sherratt"]
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath-rs.git"

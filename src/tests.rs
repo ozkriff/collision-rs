@@ -1,11 +1,5 @@
-
-extern crate test;
-extern crate cgmath;
-extern crate collision;
-extern crate collections;
-
-use collision::Intersects;
-use collision::aabb::{Aabb2, Aabb3};
+use super::Intersects;
+use super::aabb::{Aabb2, Aabb3};
 
 use cgmath::point::{Point, Point2, Point3};
 use cgmath::vector::{Vector3, Vector2};
@@ -91,8 +85,8 @@ fn test_point3_collide() {
 }
 
 mod sparse {
-    use collision::aabb::Aabb3;
-    use collision::octtree::Sparse;
+    use super::super::aabb::Aabb3;
+    use super::super::octtree::Sparse;
 
     use cgmath::point::Point3;
 
@@ -252,8 +246,8 @@ mod sparse {
 }
 
 mod linear {
-    use collision::aabb::Aabb3;
-    use collision::octtree::Linear;
+    use super::super::aabb::Aabb3;
+    use super::super::octtree::Linear;
 
     use cgmath::point::Point3;
 
@@ -319,10 +313,10 @@ mod bvh {
     use cgmath::point::Point3;
     use cgmath::vector::Vector3;
 
-    use collision::sphere::Sphere;
-    use collision::aabb::Aabb3;
-    use collision::bvh::{BvhBuilder, ToMorton};
-    use collision::Intersects;
+    use super::super::sphere::Sphere;
+    use super::super::aabb::Aabb3;
+    use super::super::bvh::{BvhBuilder, ToMorton};
+    use super::super::Intersects;
 
     use test::Bencher;
 
