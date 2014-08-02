@@ -1,12 +1,10 @@
-#![crate_id="collision#0.1"]
-#![crate_type = "rlib"]
-#![crate_type = "dylib"]
-#![comment = "A collision detection library for rust"]
+//! A collision detection library for rust
+
 #![license = "ASL2"]
-#![allow(experimental)]
 
 extern crate sync;
 extern crate cgmath;
+#[cfg(test)] extern crate test;
 
 use cgmath::point::{Point2, Point3};
 use cgmath::num::BaseNum;
@@ -16,6 +14,7 @@ mod sparse;
 pub mod bvh;
 pub mod aabb;
 pub mod sphere;
+#[cfg(test)] mod tests;
 
 pub mod octtree {
     pub use linear::Linear;
