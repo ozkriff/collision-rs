@@ -229,7 +229,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
 
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
-                match *self.data.get(frame.addr(idx)) {
+                match self.data[frame.addr(idx)] {
                     Empty => (),
                     Child => self._quary(frame.next(idx), key, |k, v| { cb(k, v) }),
                     Data(ref k, ref v) => cb(k, v),

@@ -72,7 +72,7 @@ impl
                 self._data.push(
                     if idx & 0x1 == 0 {
                         let &(_, v) = reorder_iter.next().unwrap();
-                        let &(ref aabb, ref dat) = self.data.get(v as uint);
+                        let (ref aabb, ref dat) = self.data[v as uint];
                         (aabb.clone(), dat.clone())
                     } else {
                         (Default::default(), None)
@@ -97,7 +97,7 @@ impl
                         hr /= 2;
                         right = i + hr;
                     }
-                    let new = match (self._data.get(left), self._data.get(right)) {
+                    let new = match (&self._data[left], &self._data[right]) {
                         (&(ref left, _), &(ref right, _)) => left.merge(right)
                     };
                     *self._data.get_mut(i) = (new, None);
@@ -258,7 +258,7 @@ impl<
 > Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, 'b, T, C> {
     fn next(&mut self) -> Option<(&'a C, &'a T)> {
         loop {
-            let &(ref aabb, ref dat) = self.tree.data.get(self.bt);
+            let (ref aabb, ref dat) = self.tree.data[self.bt];
 
             if dat.is_some() {
                 self.last = self.bt;

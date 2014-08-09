@@ -365,7 +365,7 @@ impl<'a, S, K, V> CollisionNodeIter<'a, S, K, V> {
                 let idx = self.index;
                 self.index += 1;
                 if dat.len() != idx {
-                    match dat.get(idx) { &(ref k, ref d) => IterData(k, d) }
+                    match dat[idx] { (ref k, ref d) => IterData(k, d) }
                 } else {
                     IterDone
                 }
