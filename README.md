@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/csherratt/collision-rs.svg?branch=master)](https://travis-ci.org/csherratt/collision-rs)
+
 This is a collision detection library written in rust. The intent of this
 library is to build upon the primitives found in cgmath-rs and flesh out the
 library into a more concrete collision detection library.
