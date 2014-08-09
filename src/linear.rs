@@ -16,7 +16,7 @@ enum Node<K, V> {
     Collide(Vec<(K, V)>)
 }
 
-impl<K: Clone+Send+Share, V: Clone+Send+Share> Clone for Node<K, V> {
+impl<K: Clone+Send+Sync, V: Clone+Send+Sync> Clone for Node<K, V> {
     fn clone(&self) -> Node<K, V> {
         match *self {
             Empty => Empty,
@@ -33,7 +33,7 @@ pub struct Linear<S, K, V> {
     data: Vec<Node<K, V>>
 }
 
-impl<S: Clone, K: Clone+Send+Share, V: Clone+Send+Share> Clone for Linear<S, K, V> {
+impl<S: Clone, K: Clone+Send+Sync, V: Clone+Send+Sync> Clone for Linear<S, K, V> {
     fn clone(&self) -> Linear<S, K, V> {
         Linear {
             scale: self.scale.clone(),
@@ -105,7 +105,7 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     }
 }
 
-impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Linear<S, K, V> {
+impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Linear<S, K, V> {
     pub fn new(size: S, depth: uint) -> Linear<S, K, V> {
         assert!(depth != 0);
         let elements = calc_size(depth);

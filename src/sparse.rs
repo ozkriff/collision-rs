@@ -22,7 +22,7 @@ pub struct Sparse<S, K, V> {
     max_depth: uint
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Branch<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Branch<S, K, V> {
     fn new() -> Branch<S, K, V> {
         Branch {
             children: [Empty, Empty, Empty, Empty,
@@ -171,7 +171,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Branch<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, V: Clone+Send+Sync> Clone for Branch<S, K, V> {
     fn clone(&self) -> Branch<S, K, V> {
         Branch {
             children: [
@@ -184,7 +184,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>,
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Sparse<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Sparse<S, K, V> {
     pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V> {
         Sparse {
             scale: scale,
@@ -218,7 +218,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Sparse<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, V: Clone+Send+Sync> Clone for Sparse<S, K, V> {
     fn clone(&self) -> Sparse<S, K, V> {
         Sparse {
             scale: self.scale.clone(),
@@ -228,7 +228,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>,
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>, V: Clone+Send+Share> Clone for Node<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, V: Clone+Send+Sync> Clone for Node<S, K, V> {
     fn clone(&self) -> Node<S, K, V> {
         match *self {
             Empty => Empty,
@@ -239,7 +239,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>,
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Share+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Share> Node<S, K, V> {
+impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Node<S, K, V> {
     #[inline(always)]
     fn insert(&mut self, centre: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         let new = match *self {
