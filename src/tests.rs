@@ -1,8 +1,8 @@
 use super::Intersects;
 use super::aabb::{Aabb2, Aabb3};
 
-use cgmath::point::{Point, Point2, Point3};
-use cgmath::vector::{Vector3, Vector2};
+use cgmath::{Point, Point2, Point3};
+use cgmath::{Vector3, Vector2};
 
 #[test]
 fn test_aabb2_collide() {
@@ -88,7 +88,7 @@ mod sparse {
     use super::super::aabb::Aabb3;
     use super::super::octtree::Sparse;
 
-    use cgmath::point::Point3;
+    use cgmath::Point3;
 
     static size: int = 5;
 
@@ -249,7 +249,7 @@ mod linear {
     use super::super::aabb::Aabb3;
     use super::super::octtree::Linear;
 
-    use cgmath::point::Point3;
+    use cgmath::Point3;
 
     static size: int = 3;
 
@@ -310,8 +310,8 @@ mod bvh {
     use std::collections::HashSet;
     use std::iter::range_inclusive;
 
-    use cgmath::point::Point3;
-    use cgmath::vector::Vector3;
+    use cgmath::Point3;
+    use cgmath::Vector3;
 
     use super::super::sphere::Sphere;
     use super::super::aabb::Aabb3;

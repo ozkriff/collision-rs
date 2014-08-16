@@ -1,6 +1,6 @@
 use std::num::{FromPrimitive, zero};
-use cgmath::point::Point3;
-use cgmath::num::BaseNum;
+use cgmath::Point3;
+use cgmath::BaseNum;
 
 use CheckRange3;
 use Intersects;

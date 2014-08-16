@@ -3,9 +3,9 @@ use std::fmt;
 use std::num::{zero, one};
 use std::default::Default;
 
-use cgmath::point::{Point, Point3};
-use cgmath::vector::{EuclideanVector, Vector, Vector3};
-use cgmath::num::{BaseNum, BaseFloat};
+use cgmath::{Point, Point3};
+use cgmath::{EuclideanVector, Vector, Vector3};
+use cgmath::{BaseNum, BaseFloat};
 
 use {Merge, Center, Intersects, Max, Min};
 

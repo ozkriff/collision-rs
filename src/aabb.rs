@@ -20,10 +20,10 @@ use std::num::{zero, one};
 use std::iter::{FromIterator, Iterator};
 use std::default::Default;
 
-use cgmath::point::{Point, Point2, Point3};
-use cgmath::vector::{Vector, Vector2, Vector3};
-use cgmath::num::BaseNum;
-use cgmath::approx::ApproxEq;
+use cgmath::{Point, Point2, Point3};
+use cgmath::{Vector, Vector2, Vector3};
+use cgmath::BaseNum;
+use cgmath::ApproxEq;
 
 use {Max, Min, Center, Merge, Intersects, CheckRange2, CheckRange3};
 

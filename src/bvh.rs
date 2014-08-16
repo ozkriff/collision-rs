@@ -6,9 +6,9 @@ use std::num::FromPrimitive;
 use std::mem::swap;
 use std::default::Default;
 
-use cgmath::point::{Point, Point2, Point3};
-use cgmath::vector::{Vector, Vector2, Vector3};
-use cgmath::num::BaseNum;
+use cgmath::{Point, Point2, Point3};
+use cgmath::{Vector, Vector2, Vector3};
+use cgmath::BaseNum;
 
 use {Max, Min, Merge, Center, Intersects};
 

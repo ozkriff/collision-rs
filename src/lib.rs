@@ -6,8 +6,8 @@ extern crate sync;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
 
-use cgmath::point::{Point2, Point3};
-use cgmath::num::BaseNum;
+use cgmath::{Point2, Point3};
+use cgmath::BaseNum;
 
 mod linear;
 mod sparse;

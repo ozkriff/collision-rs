@@ -1,10 +1,10 @@
 use std::mem;
 use std::num::{FromPrimitive, zero, one};
 
-use cgmath::vector::{Vector3, Vector};
-use cgmath::point::{Point3, Point};
-use cgmath::matrix::{Matrix};
-use cgmath::num::BaseNum;
+use cgmath::{Vector3, Vector};
+use cgmath::{Point3, Point};
+use cgmath::{Matrix};
+use cgmath::BaseNum;
 
 use CheckRange3;
 use Intersects;
