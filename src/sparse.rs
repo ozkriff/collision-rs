@@ -346,12 +346,12 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 }
 
-struct CollisionNodeIter<'a, S, K, V> {
+struct CollisionNodeIter<'a, S:'a, K:'a, V:'a> {
     node: &'a Node<S, K, V>,
     index: uint 
 }
 
-enum NodeIterData<'a, S, K, V> {
+enum NodeIterData<'a, S:'a, K:'a, V:'a> {
     IterData(&'a K, &'a V),
     IterNext(CollisionNodeIter<'a, S, K, V>),
     IterDone
@@ -386,7 +386,7 @@ impl<'a, S, K, V> CollisionNodeIter<'a, S, K, V> {
     }
 }
 
-pub struct CollisionIter<'a, S, K, V> {
+pub struct CollisionIter<'a, S:'a, K:'a, V:'a> {
     bt: Vec<CollisionNodeIter<'a, S, K, V>>
 }
 

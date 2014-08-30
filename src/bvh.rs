@@ -209,7 +209,7 @@ impl<
         (left, right)
     }
 
-    pub fn collision_iter<'a, 'b>(&'a self, collider: &'b C) -> BvhCollisionIter<'a, 'b, T, C> {
+    pub fn collision_iter<'a>(&'a self, collider: &'a C) -> BvhCollisionIter<'a, T, C> {
         BvhCollisionIter {
             bt: pow(2u, self.depth) - 1,
             last: pow(2u, self.depth+1),
@@ -240,22 +240,22 @@ impl<
     }
 }
 
-pub struct BvhCollisionIter<'a, 'b, T, C> {
+pub struct BvhCollisionIter<'a, T:'a, C:'a> {
     tree: &'a Bvh<T, C>,
     bt: uint,
     last: uint,
     parent: Vec<uint>,
-    collider: &'b C
+    collider: &'a C
 }
 
 impl<
-    'a, 'b,
+    'a,
     T: Clone,
     S: BaseNum + FromPrimitive,
     V: Vector<S>,
     P: Point<S, V> + ToMorton<P, V>,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
-> Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, 'b, T, C> {
+> Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, T, C> {
     fn next(&mut self) -> Option<(&'a C, &'a T)> {
         loop {
             let (ref aabb, ref dat) = self.tree.data[self.bt];
