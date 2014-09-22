@@ -43,12 +43,12 @@ pub trait Merge {
 }
 
 pub trait CheckRange2<S: Clone> {
-    fn check_x(&self, centre: S, scale: S) -> (bool, bool);
-    fn check_y(&self, centre: S, scale: S) -> (bool, bool);
+    fn check_x(&self, center: S, scale: S) -> (bool, bool);
+    fn check_y(&self, center: S, scale: S) -> (bool, bool);
 
-    fn check2(&self, centre: &Point2<S>, scale: S) -> [bool, ..4] {
-        let (lt_x, gt_x) = self.check_x(centre.x.clone(), scale.clone());
-        let (lt_y, gt_y) = self.check_y(centre.y.clone(), scale.clone());
+    fn check2(&self, center: &Point2<S>, scale: S) -> [bool, ..4] {
+        let (lt_x, gt_x) = self.check_x(center.x.clone(), scale.clone());
+        let (lt_y, gt_y) = self.check_y(center.y.clone(), scale.clone());
 
         [lt_x && lt_y,
          lt_x && gt_y,
@@ -58,12 +58,12 @@ pub trait CheckRange2<S: Clone> {
 }
 
 pub trait CheckRange3<S: Clone>: CheckRange2<S> {
-    fn check_z(&self, centre: S, scale: S) -> (bool, bool);
+    fn check_z(&self, center: S, scale: S) -> (bool, bool);
 
-    fn check3(&self, centre: &Point3<S>, scale: S) -> [bool, ..8] {
-        let (lt_x, gt_x) = self.check_x(centre.x.clone(), scale.clone());
-        let (lt_y, gt_y) = self.check_y(centre.y.clone(), scale.clone());
-        let (lt_z, gt_z) = self.check_z(centre.z.clone(), scale.clone());
+    fn check3(&self, center: &Point3<S>, scale: S) -> [bool, ..8] {
+        let (lt_x, gt_x) = self.check_x(center.x.clone(), scale.clone());
+        let (lt_y, gt_y) = self.check_y(center.y.clone(), scale.clone());
+        let (lt_z, gt_z) = self.check_z(center.z.clone(), scale.clone());
 
         [lt_x && lt_y && lt_z, lt_x && lt_y && gt_z,
          lt_x && gt_y && lt_z, lt_x && gt_y && gt_z,
@@ -88,17 +88,17 @@ impl<S: BaseNum> Intersects<Point3<S>> for Point3<S> {
 }
 
 impl<S: Float+FromPrimitive> CheckRange2<S> for Point3<S> {
-    fn check_x(&self, centre: S, _: S) -> (bool, bool) {
-        (self.x <= centre, self.x > centre)
+    fn check_x(&self, center: S, _: S) -> (bool, bool) {
+        (self.x <= center, self.x > center)
     }
 
-    fn check_y(&self, centre: S, _: S) -> (bool, bool) {
-        (self.y <= centre, self.y > centre)
+    fn check_y(&self, center: S, _: S) -> (bool, bool) {
+        (self.y <= center, self.y > center)
     }
 }
 
 impl<S: Float+FromPrimitive> CheckRange3<S> for Point3<S> {
-    fn check_z(&self, centre: S, _: S) -> (bool, bool) {
-        (self.z <= centre, self.z > centre)
+    fn check_z(&self, center: S, _: S) -> (bool, bool) {
+        (self.z <= center, self.z > center)
     }
 }

@@ -6,10 +6,11 @@ use std::default::Default;
 use cgmath::{Point, Point3};
 use cgmath::{EuclideanVector, Vector, Vector3};
 use cgmath::{BaseNum, BaseFloat};
+use cgmath::ApproxEq;
 
-use {Merge, Center, Intersects, Max, Min};
+use {Max, Min, Center, Merge, Intersects, CheckRange2, CheckRange3};
 
-#[deriving(Clone)]
+#[deriving(PartialEq, Clone)]
 pub struct Sphere<S> {
     pub center: Point3<S>,
     pub radius: S
@@ -117,5 +118,24 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
 impl<S: fmt::Show+BaseNum> fmt::Show for Sphere<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{} - {}]", self.center, self.radius)
+    }
+}
+
+impl<S: Float+ApproxEq<S>> CheckRange2<S> for Sphere<S> {
+    fn check_x(&self, center: S, _: S) -> (bool, bool) {
+        (self.center.x - self.radius <= center,
+         self.center.x + self.radius > center)
+    }
+
+    fn check_y(&self, center: S, _: S) -> (bool, bool) {
+        (self.center.y - self.radius <= center,
+         self.center.y + self.radius > center)
+    }
+}
+
+impl<S: Float+ApproxEq<S>> CheckRange3<S> for Sphere<S> {
+    fn check_z(&self, center: S, _: S) -> (bool, bool) {
+        (self.center.z - self.radius <= center,
+         self.center.z + self.radius > center)
     }
 }

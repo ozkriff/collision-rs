@@ -148,24 +148,24 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
 
     fn insert(&mut self, c: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         self.action_mut(c, scale, key,
-            |next, next_centre, next_scale| {
-                next.insert(next_centre, next_scale, depth, key, value);
+            |next, next_center, next_scale| {
+                next.insert(next_center, next_scale, depth, key, value);
             }
         );
     }
 
     fn remove(&mut self, c: Point3<S>, scale: S, key: &K) {
         self.action_mut(c, scale, key,
-            |next, next_centre, next_scale| {
-                next.remove(next_centre, next_scale, key);
+            |next, next_center, next_scale| {
+                next.remove(next_center, next_scale, key);
             }
         );
     }
 
     fn quary<Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
         self.action(c, scale, key,
-            |next, next_centre, next_scale| {
-                next.quary(next_centre, next_scale, key, |k, v| { cb(k, v) });
+            |next, next_center, next_scale| {
+                next.quary(next_center, next_scale, key, |k, v| { cb(k, v) });
             }
         );
     }
@@ -241,7 +241,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, 
 
 impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Node<S, K, V> {
     #[inline(always)]
-    fn insert(&mut self, centre: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
+    fn insert(&mut self, center: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
         let new = match *self {
             Empty => {
                 Data(key.clone(), value.clone())
@@ -252,8 +252,8 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                     Collide(list)
                 } else {
                     let mut data = Branch::new();
-                    data.insert(centre.clone(), scale.clone(), depth - 1, k, v);
-                    data.insert(centre.clone(), scale.clone(), depth - 1, key, value);
+                    data.insert(center.clone(), scale.clone(), depth - 1, k, v);
+                    data.insert(center.clone(), scale.clone(), depth - 1, key, value);
                     Child(box data)
                 }
 
@@ -275,14 +275,14 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                 } else {
                     let mut new = Branch::new();
                     for &(ref k, ref v) in data.iter() {
-                        new.insert(centre.clone(), scale.clone(), depth - 1, k, v);
+                        new.insert(center.clone(), scale.clone(), depth - 1, k, v);
                     }
-                    new.insert(centre.clone(), scale.clone(), depth - 1, key, value);
+                    new.insert(center.clone(), scale.clone(), depth - 1, key, value);
                     Child(box new)
                 }
             },
             Child(ref mut child) => {
-                child.insert(centre, scale, depth - 1, key, value);
+                child.insert(center, scale, depth - 1, key, value);
                 
                 match child.count() {
                     (0, 0) => Empty,
@@ -295,7 +295,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 
     #[inline(always)]
-    fn remove(&mut self, centre: Point3<S>, scale: S, key: &K) {
+    fn remove(&mut self, center: Point3<S>, scale: S, key: &K) {
         let new = match *self {
             Empty => Empty,
             Data(_, _) => {
@@ -319,7 +319,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                 return;
             }
             Child(ref mut child) => {
-                child.remove(centre, scale, key);
+                child.remove(center, scale, key);
                 return;
             }
         };
@@ -328,7 +328,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 
     #[inline(always)]
-    fn quary<Q: CheckRange3<S>>(&self, centre: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
+    fn quary<Q: CheckRange3<S>>(&self, center: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
         match *self {
             Empty => (),
             Data(ref key, ref v) => {
@@ -340,7 +340,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                 }
             },
             Child(ref child) => {
-                child.quary(centre, scale, key, |k, v| { cb(k, v) });
+                child.quary(center, scale, key, |k, v| { cb(k, v) });
             }
         }
     }
@@ -393,7 +393,7 @@ pub struct CollisionIter<'a, S:'a, K:'a, V:'a> {
 impl<'a, S, K, V> Iterator<(&'a K, &'a V)> for CollisionIter<'a, S, K, V> {
     fn next(&mut self) -> Option<(&'a K, &'a V)> {
         loop {
-            let new = match self.bt.mut_last() {
+            let new = match self.bt.last_mut() {
                 Some(last) => {
                     match last.next() {
                         IterData(k, v) => return Some((k, v)),

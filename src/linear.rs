@@ -60,7 +60,7 @@ fn calc_size(depth: uint) -> uint {
 
 #[deriving(Clone)]
 struct Frame<S> {
-    centre: Point3<S>,
+    center: Point3<S>,
     scale: S,
     base: uint,
     search: uint,
@@ -71,7 +71,7 @@ struct Frame<S> {
 impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     fn start(depth: uint, scale: S) -> Frame<S> {
         Frame {
-            centre: Point3::new(zero(), zero(), zero()),
+            center: Point3::new(zero(), zero(), zero()),
             scale: scale,
             base: 0,
             search: 0,
@@ -92,7 +92,7 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
 
 
         Frame {
-            centre: self.centre.add_v(&offset),
+            center: self.center.add_v(&offset),
             scale: hscale,
             base: self.base*8 + 8,
             search: (self.search+idx)*8,
@@ -118,7 +118,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
     }
 
     fn _insert(&mut self, frame: Frame<S>, key: &K, value: &V) {
-        let touched = key.check3(&frame.centre, frame.scale.clone());
+        let touched = key.check3(&frame.center, frame.scale.clone());
 
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
@@ -177,7 +177,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
     }
 
     fn _remove(&mut self, frame: Frame<S>, key: &K) {
-        let touched = key.check3(&frame.centre, frame.scale.clone());
+        let touched = key.check3(&frame.center, frame.scale.clone());
 
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
@@ -225,7 +225,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
     }
 
     fn _quary<Q: CheckRange3<S>>(&self, frame: Frame<S>, key: &Q, cb: |&K, &V|) {
-        let touched = key.check3(&frame.centre, frame.scale.clone());
+        let touched = key.check3(&frame.center, frame.scale.clone());
 
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {

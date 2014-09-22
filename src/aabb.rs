@@ -197,21 +197,21 @@ impl<S: BaseNum> FromIterator<Point3<S>> for Aabb3<S> {
 }
 
 impl<S: Float+ApproxEq<S>> CheckRange2<S> for Aabb3<S> {
-    fn check_x(&self, centre: S, _: S) -> (bool, bool) {
-        (self.min.x <= centre,
-         self.max.x > centre)
+    fn check_x(&self, center: S, _: S) -> (bool, bool) {
+        (self.min.x <= center,
+         self.max.x > center)
     }
 
-    fn check_y(&self, centre: S, _: S) -> (bool, bool) {
-        (self.min.y <= centre,
-         self.max.y > centre)
+    fn check_y(&self, center: S, _: S) -> (bool, bool) {
+        (self.min.y <= center,
+         self.max.y > center)
     }
 }
 
 impl<S: Float+ApproxEq<S>> CheckRange3<S> for Aabb3<S> {
-    fn check_z(&self, centre: S, _: S) -> (bool, bool) {
-        (self.min.z <= centre,
-         self.max.z > centre)
+    fn check_z(&self, center: S, _: S) -> (bool, bool) {
+        (self.min.z <= center,
+         self.max.z > center)
     }
 }
 
