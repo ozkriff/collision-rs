@@ -19,6 +19,7 @@ use std::fmt;
 use std::num::{zero, one};
 use std::iter::{FromIterator, Iterator};
 use std::default::Default;
+use serialize::{Encodable};
 
 use cgmath::{Point, Point2, Point3};
 use cgmath::{Vector, Vector2, Vector3};
@@ -66,7 +67,7 @@ pub trait Aabb
     }
 }
 
-#[deriving(PartialEq, Clone)]
+#[deriving(PartialEq, Clone, Encodable, Decodable)]
 pub struct Aabb2<S> {
     pub min: Point2<S>,
     pub max: Point2<S>,
@@ -129,7 +130,7 @@ impl<S: BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
     }
 }
 
-#[deriving(Clone, PartialEq)]
+#[deriving(Clone, PartialEq, Encodable, Decodable)]
 pub struct Aabb3<S> {
     pub min: Point3<S>,
     pub max: Point3<S>,

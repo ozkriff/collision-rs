@@ -5,6 +5,7 @@
 extern crate sync;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
+extern crate serialize;
 
 use cgmath::{Point2, Point3};
 use cgmath::BaseNum;

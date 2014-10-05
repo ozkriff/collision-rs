@@ -10,7 +10,7 @@ use cgmath::ApproxEq;
 
 use {Max, Min, Center, Merge, Intersects, CheckRange2, CheckRange3};
 
-#[deriving(PartialEq, Clone)]
+#[deriving(PartialEq, Clone, Encodable, Decodable)]
 pub struct Sphere<S> {
     pub center: Point3<S>,
     pub radius: S
