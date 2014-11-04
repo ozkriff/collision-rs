@@ -148,7 +148,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
         let x: u32 = ((self.x - base.x) * scale.x).to_u32().unwrap();
         let y: u32 = ((self.y - base.y) * scale.y).to_u32().unwrap();
         let z: u32 = ((self.z - base.z) * scale.z).to_u32().unwrap();
-        ((to_morton_code(x)<<2) | (to_morton_code(y)<<1) | to_morton_code(z))        
+        ((to_morton_code(x)<<2) | (to_morton_code(y)<<1) | to_morton_code(z))
     }
 }
 
@@ -167,7 +167,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
         }
         let x: u32 = ((self.x - base.x) * scale.x).to_u32().unwrap();
         let y: u32 = ((self.y - base.y) * scale.y).to_u32().unwrap();
-        ((to_morton_code(x)<<1) | to_morton_code(y))        
+        ((to_morton_code(x)<<1) | to_morton_code(y))
     }
 }
 

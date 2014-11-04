@@ -3,8 +3,8 @@ use std::fmt;
 use std::num::{zero, one};
 use std::default::Default;
 
-use cgmath::{Point, Point3};
-use cgmath::{EuclideanVector, Vector, Vector3};
+use cgmath::{Point, Point3, Point2};
+use cgmath::{EuclideanVector, Vector, Vector3, Vector2};
 use cgmath::{BaseNum, BaseFloat};
 use cgmath::ApproxEq;
 
@@ -29,7 +29,7 @@ impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Sphere<S> {
     fn merge(&self, other: &Sphere<S>) -> Sphere<S> {
         let diff = other.center.sub_p(&self.center);
         let dist = diff.length();
-        
+
         if dist + self.radius < other.radius {
             *other
         } else if dist + other.radius < self.radius {
@@ -58,7 +58,7 @@ impl<S: BaseNum+BaseFloat> Intersects<Sphere<S>> for Sphere<S> {
         let diff = self.center.sub_p(&other.center);
         let dist = diff.length();
 
-        dist < self.radius + other.radius 
+        dist < self.radius + other.radius
     }
 }
 
@@ -137,5 +137,127 @@ impl<S: Float+ApproxEq<S>> CheckRange3<S> for Sphere<S> {
     fn check_z(&self, center: S, _: S) -> (bool, bool) {
         (self.center.z - self.radius <= center,
          self.center.z + self.radius > center)
+    }
+}
+
+
+#[deriving(PartialEq, Clone, Encodable, Decodable)]
+pub struct Circle<S> {
+    pub center: Point2<S>,
+    pub radius: S
+}
+
+impl<S> Circle<S> {
+    pub fn new(center: Point2<S>, size: S) -> Circle<S> {
+        Circle {
+            center: center,
+            radius: size
+        }
+    }
+}
+
+impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Circle<S> {
+    fn merge(&self, other: &Circle<S>) -> Circle<S> {
+        let diff = other.center.sub_p(&self.center);
+        let dist = diff.length();
+
+        if dist + self.radius < other.radius {
+            *other
+        } else if dist + other.radius < self.radius {
+            *self
+        } else {
+            let two = one::<S>() + one::<S>();
+            let rm = (dist+self.radius+other.radius) / two;
+            let u = diff.normalize();
+            let cm = self.center.add_v(&u.mul_s(rm - self.radius));
+            Circle {
+                center: cm,
+                radius: rm
+            }
+        }
+    }
+}
+
+impl<S: Clone> Center<Point2<S>> for Circle<S> {
+    fn center(&self) -> Point2<S> {
+        self.center.clone()
+    }
+}
+
+impl<S: BaseNum+BaseFloat> Intersects<Circle<S>> for Circle<S> {
+    fn intersect(&self, other: &Circle<S>) -> bool {
+        let diff = self.center.sub_p(&other.center);
+        let dist = diff.length();
+
+        dist < self.radius + other.radius
+    }
+}
+
+impl<S: BaseNum+BaseFloat> Default for Circle<S> {
+    fn default() -> Circle<S> {
+        Circle {
+            center: Point::origin(),
+            radius: zero()
+        }
+    }
+}
+
+impl<S: BaseNum+BaseFloat> Max<Point2<S>> for Circle<S> {
+    fn max(&self) -> Point2<S> {
+        let unit = Vector2::new(self.radius, self.radius);
+        self.center.add_v(&unit)
+    }
+}
+
+impl<S: BaseNum+BaseFloat> Min<Point2<S>> for Circle<S> {
+    fn min(&self) -> Point2<S> {
+        let unit = Vector2::new(-self.radius, -self.radius);
+        self.center.add_v(&unit)
+    }
+}
+
+impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
+    fn from_iter<T: Iterator<Point2<S>>>(iterator: T) -> Circle<S> {
+        let mut iterator = iterator;
+
+        let (mut max, mut min) = match iterator.next() {
+            Some(m) => (Point2::new(m.x, m.y), Point2::new(m.x, m.y)),
+            None => return Circle::new(Point2::new(zero(), zero()), zero()),
+        };
+
+        for point in iterator {
+            max.x = max.x.max(point.x);
+            max.y = max.y.max(point.y);
+            min.x = min.x.min(point.x);
+            min.y = min.y.min(point.y);
+        }
+
+        let one: S = one();
+        let two: S = one + one;
+        let cross = max.sub_p(&min).div_s(two);
+        let radius = cross.length();
+
+        Circle {
+            center: min.add_v(&cross),
+            radius: radius
+        }
+    }
+}
+
+impl<S: fmt::Show+BaseNum> fmt::Show for Circle<S> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "[{} - {}]", self.center, self.radius)
+    }
+}
+
+impl<S: Float+ApproxEq<S>> CheckRange2<S> for Circle<S> {
+    fn check_x(&self, center: S, _: S) -> (bool, bool) {
+        (self.center.x - self.radius <= center,
+         self.center.x + self.radius > center)
+    }
+
+    fn check_y(&self, center: S, _: S) -> (bool, bool) {
+        (self.center.y - self.radius <= center,
+         self.center.y + self.radius > center)
     }
 }

@@ -1,7 +1,9 @@
 //! A collision detection library for rust
 
 #![license = "ASL2"]
+#![feature(while_let)]
 
+extern crate core;
 extern crate sync;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
@@ -15,6 +17,7 @@ mod sparse;
 pub mod bvh;
 pub mod aabb;
 pub mod sphere;
+pub mod uniform;
 #[cfg(test)] mod tests;
 
 pub mod octtree {
