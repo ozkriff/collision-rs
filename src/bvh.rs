@@ -100,7 +100,7 @@ impl
                     let new = match (&self._data[left], &self._data[right]) {
                         (&(ref left, _), &(ref right, _)) => left.merge(right)
                     };
-                    *self._data.get_mut(i) = (new, None);
+                    self._data[i] = (new, None);
                 }
 
                 step += 1;

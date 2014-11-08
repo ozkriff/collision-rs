@@ -123,9 +123,9 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
                 let mut next = Empty;
-                mem::swap(&mut next, self.data.get_mut(frame.addr(idx)));
+                mem::swap(&mut next, &mut self.data[frame.addr(idx)]);
 
-                *self.data.get_mut(frame.addr(idx)) = match next {
+                self.data[frame.addr(idx)] = match next {
                     Empty => Data(key.clone(), value.clone()),
                     Child => {
                         self._insert(frame.next(idx), key, value);
@@ -155,7 +155,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
 
                         if add_to_self {
                             data.push((key.clone(), value.clone()));
-                            Collide(data)                               
+                            Collide(data)
                         } else {
                             let frame_next = frame.next(idx);
                             for &(ref k, ref v) in data.iter() {
@@ -167,7 +167,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
                     }
                 };
             }
-        }        
+        }
     }
 
     pub fn insert(&mut self, key: K, value: V) {
@@ -182,9 +182,9 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
         for (idx, &touch) in touched.iter().enumerate() {
             if touch {
                 let mut next = Empty;
-                mem::swap(&mut next, self.data.get_mut(frame.addr(idx)));
+                mem::swap(&mut next, &mut self.data[frame.addr(idx)]);
 
-                *self.data.get_mut(frame.addr(idx)) = match next {
+                self.data[frame.addr(idx)] = match next {
                     Empty => Empty,
                     Child => {
                         self._remove(frame.next(idx), key);
@@ -215,7 +215,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
                     }
                 };
             }
-        }        
+        }
     }
 
     pub fn remove(&mut self, key: K) {
