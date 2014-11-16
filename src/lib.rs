@@ -9,6 +9,7 @@ extern crate cgmath;
 #[cfg(test)] extern crate test;
 extern crate serialize;
 
+use std::num::Float;
 use cgmath::{Point2, Point3};
 use cgmath::BaseNum;
 

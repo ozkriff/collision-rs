@@ -1,6 +1,6 @@
 
 use std::fmt;
-use std::num::{zero, one};
+use std::num::Float;
 use std::default::Default;
 
 use cgmath::{Point, Point3, Point2};
@@ -35,11 +35,11 @@ impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Sphere<S> {
         } else if dist + other.radius < self.radius {
             *self
         } else {
-            let two = one::<S>() + one::<S>();
-            let rm = (dist+self.radius+other.radius) / two;
+            let one: S = Float::one();
+            let rm = (dist+self.radius+other.radius) / (one + one);
             let u = diff.normalize();
             let cm = self.center.add_v(&u.mul_s(rm - self.radius));
-            Sphere{ 
+            Sphere{
                 center: cm,
                 radius: rm
             }
@@ -66,7 +66,7 @@ impl<S: BaseNum+BaseFloat> Default for Sphere<S> {
     fn default() -> Sphere<S> {
         Sphere {
             center: Point::origin(),
-            radius: zero()
+            radius: Float::zero()
         }
     }
 }
@@ -91,7 +91,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point3::new(m.x, m.y, m.z), Point3::new(m.x, m.y, m.z)),
-            None => return Sphere::new(Point3::new(zero(), zero(), zero()), zero()),
+            None => return Sphere::new(Point3::new(Float::zero(), Float::zero(), Float::zero()), Float::zero()),
         };
 
         for point in iterator {
@@ -103,7 +103,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
             min.z = min.z.min(point.z);
         }
 
-        let one: S = one();
+        let one: S = Float::one();
         let two: S = one + one;
         let cross = max.sub_p(&min).div_s(two);
         let radius = cross.length();
@@ -166,8 +166,8 @@ impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Circle<S> {
         } else if dist + other.radius < self.radius {
             *self
         } else {
-            let two = one::<S>() + one::<S>();
-            let rm = (dist+self.radius+other.radius) / two;
+            let one: S = Float::one();
+            let rm = (dist+self.radius+other.radius) / (one + one);
             let u = diff.normalize();
             let cm = self.center.add_v(&u.mul_s(rm - self.radius));
             Circle {
@@ -197,7 +197,7 @@ impl<S: BaseNum+BaseFloat> Default for Circle<S> {
     fn default() -> Circle<S> {
         Circle {
             center: Point::origin(),
-            radius: zero()
+            radius: Float::zero()
         }
     }
 }
@@ -222,7 +222,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point2::new(m.x, m.y), Point2::new(m.x, m.y)),
-            None => return Circle::new(Point2::new(zero(), zero()), zero()),
+            None => return Circle::new(Point2::new(Float::zero(), Float::zero()), Float::zero()),
         };
 
         for point in iterator {
@@ -232,7 +232,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
             min.y = min.y.min(point.y);
         }
 
-        let one: S = one();
+        let one: S = Float::one();
         let two: S = one + one;
         let cross = max.sub_p(&min).div_s(two);
         let radius = cross.length();

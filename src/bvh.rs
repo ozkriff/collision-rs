@@ -1,8 +1,7 @@
 
 use std::vec::Vec;
 use std::iter::range_step;
-use std::num::{pow, one};
-use std::num::FromPrimitive;
+use std::num::{NumCast, pow, one, FromPrimitive};
 use std::mem::swap;
 use std::default::Default;
 
@@ -53,7 +52,7 @@ impl
         self.data.push((collider.clone(), Some(data)));
     }
 
-    pub fn build(mut self) -> Bvh<T, C> { 
+    pub fn build(mut self) -> Bvh<T, C> {
         let step = if self.data.len() != 0 {
             let base = self.min.clone();
             let scale: S = FromPrimitive::from_int(1023).unwrap();

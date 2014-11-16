@@ -1,4 +1,4 @@
-use std::num::{FromPrimitive, zero};
+use std::num::{FromPrimitive, Float};
 use cgmath::Point3;
 use cgmath::BaseNum;
 
@@ -184,7 +184,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, 
     }
 }
 
-impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Sparse<S, K, V> {
+impl<S: Float+BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Sparse<S, K, V> {
     pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V> {
         Sparse {
             scale: scale,
@@ -194,17 +194,17 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 
     pub fn insert(&mut self, key: K, value: V) {
-        self.root.insert(Point3::new(zero(), zero(), zero()),
+        self.root.insert(Point3::new(Float::zero(), Float::zero(), Float::zero()),
                          self.scale.clone(), self.max_depth, &key, &value)
     }
 
     pub fn remove(&mut self, key: K) {
-        self.root.remove(Point3::new(zero(), zero(), zero()),
+        self.root.remove(Point3::new(Float::zero(), Float::zero(), Float::zero()),
                          self.scale.clone(), &key)
     }
 
     pub fn quary<Q: CheckRange3<S>>(&self, key: &Q, cb: |&K, &V|) {
-        self.root.quary(Point3::new(zero(), zero(), zero()),
+        self.root.quary(Point3::new(Float::zero(), Float::zero(), Float::zero()),
                         self.scale.clone(), key, cb)
     }
 

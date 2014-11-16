@@ -1,5 +1,6 @@
 use std::mem;
-use std::num::{FromPrimitive, zero, one};
+use std::num::Float;
+use std::num::{FromPrimitive, one};
 
 use cgmath::{Vector3, Vector};
 use cgmath::{Point3, Point};
@@ -52,7 +53,7 @@ fn calc_size(depth: uint) -> uint {
     let mut total = 0;
     for _ in range(0, depth) {
         total += size*size*size;
-        size *= 2; 
+        size *= 2;
     }
 
     total
@@ -71,7 +72,7 @@ struct Frame<S> {
 impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     fn start(depth: uint, scale: S) -> Frame<S> {
         Frame {
-            center: Point3::new(zero(), zero(), zero()),
+            center: Point3::new(Float::zero(), Float::zero(), Float::zero()),
             scale: scale,
             base: 0,
             search: 0,
@@ -82,7 +83,7 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
     fn next(&self, idx: uint) -> Frame<S> {
         assert!(self.left != 0);
         let hscale = self.scale / (FromPrimitive::from_uint(2).unwrap());
-        let one: S = one();
+        let one: S = Float::one();
 
         let offset = Vector3::new(
             if (idx & 4) == 0 {-one.clone()} else {one.clone()},
