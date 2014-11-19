@@ -9,6 +9,7 @@ use cgmath::BaseNum;
 
 use CheckRange3;
 use Intersects;
+use self::Node::{Empty, Child, Data, Collide};
 
 enum Node<K, V> {
     Empty,

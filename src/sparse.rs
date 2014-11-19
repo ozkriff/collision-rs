@@ -4,6 +4,8 @@ use cgmath::BaseNum;
 
 use CheckRange3;
 use Intersects;
+use self::Node::{Empty, Child, Data, Collide};
+use self::NodeIterData::{IterData, IterNext, IterDone};
 
 struct Branch<S, K, V> {
     children: [Node<S, K, V>, ..8]
