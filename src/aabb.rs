@@ -21,6 +21,7 @@ use std::iter::{FromIterator, Iterator};
 use std::default::Default;
 use serialize::{Encodable};
 
+use cgmath::PartialOrd;
 use cgmath::{Point, Point2, Point3};
 use cgmath::{Vector, Vector2, Vector3};
 use cgmath::BaseNum;

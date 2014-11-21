@@ -1,11 +1,11 @@
 
 use std::vec::Vec;
 use std::iter::range_step;
-use std::num::{NumCast, pow, one, FromPrimitive};
+use std::num::{NumCast, Int, FromPrimitive};
 use std::mem::swap;
 use std::default::Default;
 
-use cgmath::{Point, Point2, Point3};
+use cgmath::{Point, Point2, Point3, one};
 use cgmath::{Vector, Vector2, Vector3};
 use cgmath::BaseNum;
 
@@ -81,14 +81,14 @@ impl
 
             let mut step = 1;
             loop {
-                let reach = pow(2u, step);
-                let half_reach = pow(2u, step-1);
+                let reach = 2u.pow(step);
+                let half_reach = 2u.pow(step-1);
 
                 if reach > self._data.len() {
                     break
                 }
 
-                for i in range_step(reach-1, self._data.len(), pow(2u, step+1)) {
+                for i in range_step(reach-1, self._data.len(), 2u.pow(step+1)) {
                     let left = i - half_reach;
                     let mut right = i + half_reach;
                     let mut hr = half_reach;
@@ -195,7 +195,7 @@ impl<
     fn children(&self, idx: uint) -> (uint, uint) {
         let depth = self.depth(idx);
 
-        let mut half = pow(2u, depth-1);
+        let mut half = 2u.pow(depth-1);
         let left = idx - half;
         let mut right = idx + half;
 
@@ -210,8 +210,8 @@ impl<
 
     pub fn collision_iter<'a>(&'a self, collider: &'a C) -> BvhCollisionIter<'a, T, C> {
         BvhCollisionIter {
-            bt: pow(2u, self.depth) - 1,
-            last: pow(2u, self.depth+1),
+            bt: 2u.pow(self.depth) - 1,
+            last: 2u.pow(self.depth+1),
             parent: Vec::new(),
             tree: self,
             collider: collider
