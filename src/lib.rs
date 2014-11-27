@@ -4,7 +4,6 @@
 #![feature(while_let)]
 
 extern crate core;
-extern crate sync;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
 extern crate serialize;
