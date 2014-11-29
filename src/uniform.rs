@@ -15,6 +15,7 @@ pub struct Uniform2D<C, V> {
     scale_inv: f32,
     size: i32,
     items: Vec<Item<C, V>>,
+    free: Vec<i32>,
     grid: Vec<Option<i32>>
 }
 
@@ -25,6 +26,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             scale: scale,
             size: size,
             items: Vec::new(),
+            free: Vec::new(),
             grid: Vec::from_fn((size*size) as uint, |_| None)
         }
     }
@@ -33,7 +35,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
         ((self.scale_inv * pt) + (self.size as f32 / 2.))
     }
 
-    fn get_off(&self, pt: f32) -> Option<i32> {
+    fn get_offset(&self, pt: f32) -> Option<i32> {
         self.in_range(self.scale(pt) as i32)
     }
 
@@ -45,8 +47,20 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
         }
     }
 
+    fn link(&mut self, item: Item<C, V>) -> i32 {
+        if let Some(idx) = self.free.pop() {
+            self.items[idx as uint] = item;
+            idx
+        } else {
+            let last = self.items.len();
+            self.items.push(item);
+            last as i32
+        }
+    }
+
     pub fn clear(&mut self) {
         self.items.clear();
+        self.free.clear();
         for g in self.grid.iter_mut() {
             *g = None;
         }
@@ -54,8 +68,8 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
 
     pub fn insert(&mut self, collider: C, value: V) {
         let pt = collider.center();
-        let x = self.get_off(pt.x);
-        let y = self.get_off(pt.y);
+        let x = self.get_offset(pt.x);
+        let y = self.get_offset(pt.y);
 
         let (x, y) = match (x, y) {
             (Some(x), Some(y)) => (x, y),
@@ -70,8 +84,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             value: value
         };
 
-        let off = self.items.len();
-        self.items.push(item);
+        let off = self.link(item);
         self.grid[idx] = Some(off as i32);
     }
 
@@ -83,6 +96,54 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             collide: collide,
             cell: None
         }
+    }
+}
+
+
+impl<C: Center<Point2<f32>>, V: Eq> Uniform2D<C, V> {
+    fn find(&self, idx: uint, v: &V) -> Option<i32> {
+        let mut start = self.grid[idx];
+        while let Some(idx) = start {
+            if &self.items[idx as uint].value == v {
+                return Some(idx);
+            }
+            start = self.items[idx as uint].next
+        }
+        None
+    }
+
+    pub fn remove(&mut self, collider: &C, value: &V) -> bool {
+        let pt = collider.center();
+        let x = self.get_offset(pt.x);
+        let y = self.get_offset(pt.y);
+
+        let (x, y) = match (x, y) {
+            (Some(x), Some(y)) => (x, y),
+            _ => return false
+        };
+
+        let idx = (x * self.size + y) as uint;
+        if let Some(i) = self.find(idx, value) {
+            self.free.push(i);
+
+            // remove link if it is at the start of the list
+            let mut start = self.grid[idx];
+            if let Some(s) = start {
+                if s == i {
+                    self.grid[idx] = self.items[i as uint].next;
+                    return true;
+                }
+            }
+
+            // remove link if it is linked in the items
+            while let Some(s) = start {
+                if self.items[s as uint].next == Some(i) {
+                    self.items[s as uint].next = self.items[i as uint].next;
+                }
+                start = self.items[s as uint].next
+            }
+        }
+        false
     }
 }
 
@@ -134,26 +195,85 @@ impl<'a, C: Center<Point2<f32>>+Intersects<C>+Show, V> Iterator<(&'a C, &'a V)> 
 mod tests {
     use super::Uniform2D;
     use super::super::sphere::Circle;
+    use std::collections::HashSet;
+    use cgmath::Point2;
 
     #[test]
-    fn get_off() {
+    fn get_offset() {
         let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
-        assert_eq!(grid.get_off(0.), Some(1));
-        assert_eq!(grid.get_off(-1.), Some(0));
-        assert_eq!(grid.get_off(1.), None);
+        assert_eq!(grid.get_offset(0.), Some(1));
+        assert_eq!(grid.get_offset(-1.), Some(0));
+        assert_eq!(grid.get_offset(1.), None);
 
         let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 2.);
-        assert_eq!(grid.get_off(0.), Some(1));
-        assert_eq!(grid.get_off(-1.), Some(0));
-        assert_eq!(grid.get_off(-2.), Some(0));
-        assert_eq!(grid.get_off(1.), Some(1));
-        assert_eq!(grid.get_off(2.), None);
+        assert_eq!(grid.get_offset(0.), Some(1));
+        assert_eq!(grid.get_offset(-1.), Some(0));
+        assert_eq!(grid.get_offset(-2.), Some(0));
+        assert_eq!(grid.get_offset(1.), Some(1));
+        assert_eq!(grid.get_offset(2.), None);
 
         let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(4, 2.);
-        assert_eq!(grid.get_off(0.), Some(2));
-        assert_eq!(grid.get_off(-1.), Some(1));
-        assert_eq!(grid.get_off(-2.), Some(0));
-        assert_eq!(grid.get_off(1.), Some(3));
-        assert_eq!(grid.get_off(2.), None);
+        assert_eq!(grid.get_offset(0.), Some(2));
+        assert_eq!(grid.get_offset(-1.), Some(1));
+        assert_eq!(grid.get_offset(-2.), Some(0));
+        assert_eq!(grid.get_offset(1.), Some(3));
+        assert_eq!(grid.get_offset(2.), None);
+    }
+
+    #[test]
+    fn insert() {
+        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0i),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1i),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2i)];
+
+        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
+        for &(k, v) in to_find.iter() {
+            grid.insert(k, v);
+        }
+
+        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
+            set.remove(v);
+        }
+        assert_eq!(set.len(), 0);
+    }
+
+    #[test]
+    fn remove() {
+        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0i),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1i),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2i)];
+
+        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
+        for &(k, v) in to_find.iter() {
+            grid.insert(k, v);
+        }
+
+        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
+            set.remove(v);
+        }
+        assert_eq!(set.len(), 0);
+
+        grid.remove(&to_find[0].0, &to_find[0].1);
+        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
+            set.remove(v);
+        }
+        assert_eq!(set.len(), 1);
+
+        grid.remove(&to_find[2].0, &to_find[2].1);
+        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
+            set.remove(v);
+        }
+        assert_eq!(set.len(), 2);
+
+        grid.remove(&to_find[1].0, &to_find[1].1);
+        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
+            set.remove(v);
+        }
+        assert_eq!(set.len(), 3);
     }
 }
