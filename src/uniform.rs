@@ -66,17 +66,24 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
         }
     }
 
-    pub fn insert(&mut self, collider: C, value: V) {
+    fn idx(&self, collider: &C) -> Option<uint> {
         let pt = collider.center();
         let x = self.get_offset(pt.x);
         let y = self.get_offset(pt.y);
 
         let (x, y) = match (x, y) {
             (Some(x), Some(y)) => (x, y),
-            _ => return
+            _ => return None
         };
 
-        let idx = (x * self.size + y) as uint;
+        Some((x * self.size + y) as uint)
+    }
+
+    pub fn insert(&mut self, collider: C, value: V) {
+        let idx = match self.idx(&collider) {
+            Some(idx) => idx,
+            None => return
+        };
 
         let item = Item {
             next: self.grid[idx],
@@ -113,16 +120,11 @@ impl<C: Center<Point2<f32>>, V: Eq> Uniform2D<C, V> {
     }
 
     pub fn remove(&mut self, collider: &C, value: &V) -> bool {
-        let pt = collider.center();
-        let x = self.get_offset(pt.x);
-        let y = self.get_offset(pt.y);
-
-        let (x, y) = match (x, y) {
-            (Some(x), Some(y)) => (x, y),
-            _ => return false
+        let idx = match self.idx(collider) {
+            Some(idx) => idx,
+            None => return false
         };
 
-        let idx = (x * self.size + y) as uint;
         if let Some(i) = self.find(idx, value) {
             self.free.push(i);
 
@@ -139,11 +141,48 @@ impl<C: Center<Point2<f32>>, V: Eq> Uniform2D<C, V> {
             while let Some(s) = start {
                 if self.items[s as uint].next == Some(i) {
                     self.items[s as uint].next = self.items[i as uint].next;
+                    return true;
                 }
                 start = self.items[s as uint].next
             }
         }
         false
+    }
+}
+
+impl<C: Center<Point2<f32>>, V: Clone+Eq> Uniform2D<C, V> {
+    pub fn update(&mut self, old: &C, new: C, value: &V) {
+        let new_idx = match self.idx(&new) {
+            Some(idx) => idx,
+            None => {
+                self.remove(old, value);
+                return
+            }
+        };
+
+        let old_idx = match self.idx(old) {
+            Some(idx) => idx,
+            None => {
+                self.insert(new, value.clone());
+                return
+            }
+        };
+
+        println!("{} -> {}", old_idx, new_idx);
+
+        if old_idx != new_idx {
+            self.remove(old, value);
+            self.insert(new, value.clone());
+            return;
+        }
+
+        let idx = new_idx;
+        if let Some(i) = self.find(idx, value) {
+            println!("found {}", i);
+            self.items[i as uint].collider = new;
+        } else {
+            panic!()
+        }
     }
 }
 
@@ -275,5 +314,65 @@ mod tests {
             set.remove(v);
         }
         assert_eq!(set.len(), 3);
+    }
+
+    #[test]
+    fn update() {
+        let old = vec![(Circle::new(Point2::new(0f32, 0f32), 0.1f32), 0i),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 1i),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 2i),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 3i)];
+
+        let new = vec![(Circle::new(Point2::new(1f32, 1f32), 0.1f32), 0i),
+                       (Circle::new(Point2::new(-1f32, 1f32), 0.1f32), 1i),
+                       (Circle::new(Point2::new(1f32, -1f32), 0.1f32), 2i),
+                       (Circle::new(Point2::new(-1f32, -1f32), 0.1f32), 3i)];
+
+        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(4, 2.);
+        for &(k, v) in old.iter() {
+            grid.insert(k, v);
+        }
+
+        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        for &(ref k, _) in old.iter() {
+            for (_, v) in grid.collision_iter(k) {
+                set.remove(v);
+            }
+        }
+        assert_eq!(set.len(), 0);
+
+        for (&(ko, vo), &(kn, vn)) in old.iter().zip(old.iter()) {
+            assert_eq!(vo, vn);
+            grid.update(&ko, kn, &vn);
+        }
+
+        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        for &(ref k, _) in old.iter() {
+            for (_, v) in grid.collision_iter(k) {
+                set.remove(v);
+            }
+        }
+        assert_eq!(set.len(), 0);
+
+        for (&(ko, vo), &(kn, vn)) in old.iter().zip(new.iter()) {
+            assert_eq!(vo, vn);
+            grid.update(&ko, kn, &vn);
+        }
+
+        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        for &(ref pk, _) in old.iter() {
+            for (_, v) in grid.collision_iter(pk) {
+                set.remove(v);
+            }
+        }
+        assert_eq!(set.len(), 4);
+
+        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        for &(ref pk, _) in new.iter() {
+            for (_, v) in grid.collision_iter(pk) {
+                set.remove(v);
+            }
+        }
+        assert_eq!(set.len(), 0);
     }
 }
