@@ -1,6 +1,6 @@
 use cgmath::Point2;
 use super::{Center, Intersects};
-use core::fmt::Show;
+use core::iter::Range;
 
 #[deriving(Clone)]
 struct Item<C, V> {
@@ -95,13 +95,21 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
         self.grid[idx] = Some(off as i32);
     }
 
-    pub fn collision_iter<'a>(&'a self, collide: &'a C) -> Uniform2DIterator<'a, C, V> {
-        Uniform2DIterator {
+    pub fn collision_iter<'a>(&'a self, collide: &'a C) -> Uniform2DCollideIterator<'a, C, V> {
+        Uniform2DCollideIterator {
             grid: self,
             x: -2,
             y: -1,
             collide: collide,
             cell: None
+        }
+    }
+
+    pub fn iter<'a>(&'a self) -> Uniform2DIterator<'a, C, V> {
+        Uniform2DIterator {
+            grid: self,
+            idx: range(0, self.grid.len()),
+            head: None
         }
     }
 }
@@ -183,7 +191,17 @@ impl<C: Center<Point2<f32>>, V: Clone+Eq> Uniform2D<C, V> {
     }
 }
 
-pub struct Uniform2DIterator<'a, C:'a, V:'a> {
+impl<C: Center<Point2<f32>>+Clone, V: Clone> Uniform2D<C, V> {
+    pub fn defrag(&self) -> Uniform2D<C, V> {
+        let mut new = Uniform2D::new(self.size, self.scale);
+        for (c, v) in self.iter() {
+            new.insert(c.clone(), v.clone());
+        }
+        new
+    }
+}
+
+pub struct Uniform2DCollideIterator<'a, C:'a, V:'a> {
     grid: &'a Uniform2D<C, V>,
     collide: &'a C,
     x: i8,
@@ -191,7 +209,7 @@ pub struct Uniform2DIterator<'a, C:'a, V:'a> {
     cell: Option<i32>
 }
 
-impl<'a, C: Center<Point2<f32>>+Intersects<C>+Show, V> Iterator<(&'a C, &'a V)> for Uniform2DIterator<'a, C, V> {
+impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator<(&'a C, &'a V)> for Uniform2DCollideIterator<'a, C, V> {
     #[inline(never)]
     fn next(&mut self) -> Option<(&'a C, &'a V)> {
         loop {
@@ -223,6 +241,32 @@ impl<'a, C: Center<Point2<f32>>+Intersects<C>+Show, V> Iterator<(&'a C, &'a V)> 
                 (Some(x), Some(y)) => self.grid.grid[(x*self.grid.size+y) as uint],
                 _ => None
             };
+        }
+    }
+}
+
+pub struct Uniform2DIterator<'a, C:'a, V:'a> {
+    grid: &'a Uniform2D<C, V>,
+    idx: Range<uint>,
+    head: Option<i32>
+}
+
+impl<'a, C: Center<Point2<f32>>, V> Iterator<(&'a C, &'a V)> for Uniform2DIterator<'a, C, V> {
+    #[inline(never)]
+    fn next(&mut self) -> Option<(&'a C, &'a V)> {
+        loop {
+            while let Some(idx) = self.head {
+                let cell = &self.grid.items[idx as uint];
+                self.head = cell.next;
+
+                return Some((&cell.collider, &cell.value));
+            }
+
+            if let Some(idx) = self.idx.next() {
+                self.head = self.grid.grid[idx];
+            } else {
+                return None;
+            }
         }
     }
 }
