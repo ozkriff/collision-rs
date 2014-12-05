@@ -168,8 +168,6 @@ impl<C: Center<Point2<f32>>, V: Clone+Eq> Uniform2D<C, V> {
             }
         };
 
-        println!("{} -> {}", old_idx, new_idx);
-
         if old_idx != new_idx {
             self.remove(old, value);
             self.insert(new, value.clone());
@@ -178,7 +176,6 @@ impl<C: Center<Point2<f32>>, V: Clone+Eq> Uniform2D<C, V> {
 
         let idx = new_idx;
         if let Some(i) = self.find(idx, value) {
-            println!("found {}", i);
             self.items[i as uint].collider = new;
         } else {
             panic!()
