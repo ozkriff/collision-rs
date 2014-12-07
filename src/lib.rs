@@ -1,10 +1,5 @@
 //! A collision detection library for rust
 
-#![license = "ASL2"]
-#![feature(while_let)]
-#![feature(if_let)]
-#![feature(tuple_indexing)]
-
 extern crate core;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
