@@ -68,7 +68,7 @@ pub trait Aabb
     }
 }
 
-#[deriving(PartialEq, Clone, Encodable, Decodable)]
+#[deriving(PartialEq, Clone, Encodable, Decodable, Copy)]
 pub struct Aabb2<S> {
     pub min: Point2<S>,
     pub max: Point2<S>,
@@ -131,7 +131,7 @@ impl<S: Float+BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
     }
 }
 
-#[deriving(Clone, PartialEq, Encodable, Decodable)]
+#[deriving(Clone, PartialEq, Encodable, Decodable, Copy)]
 pub struct Aabb3<S> {
     pub min: Point3<S>,
     pub max: Point3<S>,
