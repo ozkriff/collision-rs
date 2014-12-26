@@ -3,7 +3,7 @@
 extern crate core;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
-extern crate serialize;
+extern crate "rustc-serialize" as rustc_serialize;
 
 use std::num::Float;
 use cgmath::{Point2, Point3};

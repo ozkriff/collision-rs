@@ -7,3 +7,6 @@ description = "A Collision detection library derived from cgmath"
 
 [dependencies.cgmath]
 git = "https://github.com/bjz/cgmath-rs"
+
+[dependencies]
+rustc-serialize="*"
