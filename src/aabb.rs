@@ -33,7 +33,7 @@ pub trait Aabb
     S: Float+BaseNum,
     V: Vector<S>,
     P: Point<S, V>
-> {
+>: Sized {
     fn new(p1: P, p2: P) -> Self;
     fn aabb_min<'a>(&'a self) -> &'a P;
     fn aabb_max<'a>(&'a self) -> &'a P;
@@ -67,7 +67,7 @@ pub trait Aabb
     }
 }
 
-#[deriving(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
+#[derive(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
 pub struct Aabb2<S> {
     pub min: Point2<S>,
     pub max: Point2<S>,
@@ -130,7 +130,7 @@ impl<S: Float+BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
     }
 }
 
-#[deriving(Clone, PartialEq, RustcEncodable, RustcDecodable, Copy)]
+#[derive(Clone, PartialEq, RustcEncodable, RustcDecodable, Copy)]
 pub struct Aabb3<S> {
     pub min: Point3<S>,
     pub max: Point3<S>,

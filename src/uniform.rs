@@ -2,14 +2,14 @@ use cgmath::Point2;
 use super::{Center, Intersects};
 use core::iter::Range;
 
-#[deriving(Clone)]
+#[derive(Clone)]
 struct Item<C, V> {
     next: Option<i32>,
     collider: C,
     value: V
 }
 
-#[deriving(Clone)]
+#[derive(Clone)]
 pub struct Uniform2D<C, V> {
     scale: f32,
     scale_inv: f32,
@@ -27,7 +27,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             size: size,
             items: Vec::new(),
             free: Vec::new(),
-            grid: Vec::from_fn((size*size) as uint, |_| None)
+            grid: range(0, size*size).map(|_| { None }).collect()
         }
     }
 

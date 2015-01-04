@@ -60,7 +60,7 @@ fn calc_size(depth: uint) -> uint {
     total
 }
 
-#[deriving(Clone)]
+#[derive(Clone)]
 struct Frame<S> {
     center: Point3<S>,
     scale: S,
@@ -115,7 +115,7 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
         Linear {
             scale: size,
             depth: depth,
-            data: Vec::from_fn(elements, |_| { Empty })
+            data: range(0, elements).map(|_| { Empty }).collect()
         }
     }
 

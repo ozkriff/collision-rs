@@ -1,6 +1,7 @@
 
 use std::fmt;
 use std::num::Float;
+use std::iter::FromIterator;
 use std::default::Default;
 
 use cgmath::{Point, Point3, Point2};
@@ -10,7 +11,7 @@ use cgmath::ApproxEq;
 
 use {Max, Min, Center, Merge, Intersects, CheckRange2, CheckRange3};
 
-#[deriving(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
+#[derive(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
 pub struct Sphere<S> {
     pub center: Point3<S>,
     pub radius: S
@@ -141,7 +142,7 @@ impl<S: Float+ApproxEq<S>> CheckRange3<S> for Sphere<S> {
 }
 
 
-#[deriving(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
+#[derive(PartialEq, Clone, RustcEncodable, RustcDecodable, Copy)]
 pub struct Circle<S> {
     pub center: Point2<S>,
     pub radius: S

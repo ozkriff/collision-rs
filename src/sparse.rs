@@ -8,7 +8,7 @@ use self::Node::{Empty, Child, Data, Collide};
 use self::NodeIterData::{IterData, IterNext, IterDone};
 
 struct Branch<S, K, V> {
-    children: [Node<S, K, V>, ..8]
+    children: [Node<S, K, V>; 8]
 }
 
 enum Node<S, K, V> {

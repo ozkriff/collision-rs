@@ -1,11 +1,13 @@
 //! A collision detection library for rust
+#![feature(old_orphan_check)]
 
 extern crate core;
 extern crate cgmath;
 #[cfg(test)] extern crate test;
 extern crate "rustc-serialize" as rustc_serialize;
 
-use std::num::Float;
+use std::num::{Float, FromPrimitive};
+
 use cgmath::{Point2, Point3};
 use cgmath::BaseNum;
 
@@ -47,7 +49,7 @@ pub trait CheckRange2<S: Clone> {
     fn check_x(&self, center: S, scale: S) -> (bool, bool);
     fn check_y(&self, center: S, scale: S) -> (bool, bool);
 
-    fn check2(&self, center: &Point2<S>, scale: S) -> [bool, ..4] {
+    fn check2(&self, center: &Point2<S>, scale: S) -> [bool; 4] {
         let (lt_x, gt_x) = self.check_x(center.x.clone(), scale.clone());
         let (lt_y, gt_y) = self.check_y(center.y.clone(), scale.clone());
 
@@ -61,7 +63,7 @@ pub trait CheckRange2<S: Clone> {
 pub trait CheckRange3<S: Clone>: CheckRange2<S> {
     fn check_z(&self, center: S, scale: S) -> (bool, bool);
 
-    fn check3(&self, center: &Point3<S>, scale: S) -> [bool, ..8] {
+    fn check3(&self, center: &Point3<S>, scale: S) -> [bool; 8] {
         let (lt_x, gt_x) = self.check_x(center.x.clone(), scale.clone());
         let (lt_y, gt_y) = self.check_y(center.y.clone(), scale.clone());
         let (lt_z, gt_z) = self.check_z(center.z.clone(), scale.clone());
