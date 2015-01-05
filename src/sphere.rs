@@ -87,7 +87,7 @@ impl<S: BaseNum+BaseFloat> Min<Point3<S>> for Sphere<S> {
 }
 
 impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
-    fn from_iter<T: Iterator<Point3<S>>>(iterator: T) -> Sphere<S> {
+    fn from_iter<T: Iterator<Item=Point3<S>>>(iterator: T) -> Sphere<S> {
         let mut iterator = iterator;
 
         let (mut max, mut min) = match iterator.next() {
@@ -218,7 +218,7 @@ impl<S: BaseNum+BaseFloat> Min<Point2<S>> for Circle<S> {
 }
 
 impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
-    fn from_iter<T: Iterator<Point2<S>>>(iterator: T) -> Circle<S> {
+    fn from_iter<T: Iterator<Item=Point2<S>>>(iterator: T) -> Circle<S> {
         let mut iterator = iterator;
 
         let (mut max, mut min) = match iterator.next() {

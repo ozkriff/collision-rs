@@ -107,7 +107,7 @@ impl<S: fmt::Show+BaseNum> fmt::Show for Aabb2<S> {
 }
 
 impl<S: Float+BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
-    fn from_iter<T: Iterator<Point2<S>>>(iterator: T) -> Aabb2<S> {
+    fn from_iter<T: Iterator<Item=Point2<S>>>(iterator: T) -> Aabb2<S> {
         let mut iterator = iterator;
 
         let (mut max, mut min) = match iterator.next() {
@@ -172,7 +172,7 @@ impl<S: fmt::Show+BaseNum> fmt::Show for Aabb3<S> {
 }
 
 impl<S: Float+BaseNum> FromIterator<Point3<S>> for Aabb3<S> {
-    fn from_iter<T: Iterator<Point3<S>>>(iterator: T) -> Aabb3<S> {
+    fn from_iter<T: Iterator<Item=Point3<S>>>(iterator: T) -> Aabb3<S> {
         let mut iterator = iterator;
 
         let (mut max, mut min) = match iterator.next() {

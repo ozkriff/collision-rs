@@ -254,7 +254,9 @@ impl<
     V: Vector<S>,
     P: Point<S, V> + ToMorton<P, V>,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
-> Iterator<(&'a C, &'a T)> for BvhCollisionIter<'a, T, C> {
+> Iterator for BvhCollisionIter<'a, T, C> {
+    type Item = (&'a C, &'a T);
+
     fn next(&mut self) -> Option<(&'a C, &'a T)> {
         loop {
             let (ref aabb, ref dat) = self.tree.data[self.bt];

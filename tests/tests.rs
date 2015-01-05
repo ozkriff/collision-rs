@@ -1,5 +1,8 @@
-use super::Intersects;
-use super::aabb::{Aabb2, Aabb3};
+extern crate collision;
+extern crate cgmath;
+
+use collision::Intersects;
+use collision::aabb::{Aabb2, Aabb3};
 
 use cgmath::{Point, Point2, Point3};
 use cgmath::{Vector3, Vector2};
@@ -85,8 +88,11 @@ fn test_point3_collide() {
 }
 
 mod sparse {
-    use super::super::aabb::Aabb3;
-    use super::super::octtree::Sparse;
+    extern crate collision;
+    extern crate cgmath;
+
+    use collision::aabb::Aabb3;
+    use collision::octtree::Sparse;
 
     use cgmath::Point3;
 
@@ -246,8 +252,11 @@ mod sparse {
 }
 
 mod linear {
-    use super::super::aabb::Aabb3;
-    use super::super::octtree::Linear;
+    extern crate collision;
+    extern crate cgmath;
+
+    use collision::aabb::Aabb3;
+    use collision::octtree::Linear;
 
     use cgmath::Point3;
 
@@ -307,6 +316,10 @@ mod linear {
 }
 
 mod bvh {
+    extern crate collision;
+    extern crate cgmath;
+    extern crate test;
+
     use std::num::Float;
     use std::collections::HashSet;
     use std::iter::range_inclusive;
@@ -314,12 +327,10 @@ mod bvh {
     use cgmath::Point3;
     use cgmath::Vector3;
 
-    use super::super::sphere::Sphere;
-    use super::super::aabb::Aabb3;
-    use super::super::bvh::{BvhBuilder, ToMorton};
-    use super::super::Intersects;
-
-    use test::Bencher;
+    use collision::sphere::Sphere;
+    use collision::aabb::Aabb3;
+    use collision::bvh::{BvhBuilder, ToMorton};
+    use collision::Intersects;
 
     static SIZE: int = 10;
 
@@ -501,7 +512,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_aabb_build(bench: &mut Bencher) {
+    fn bench_aabb_build(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-SIZE, SIZE) {
@@ -521,7 +532,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_aabb_build_add_only(bench: &mut Bencher) {
+    fn bench_aabb_build_add_only(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-SIZE, SIZE) {
@@ -541,7 +552,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_aabb_iter_half(bench: &mut Bencher) {
+    fn bench_aabb_iter_half(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-SIZE, SIZE) {
             for y in range_inclusive(-SIZE, SIZE) {
@@ -570,7 +581,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_aabb_iter_one(bench: &mut Bencher) {
+    fn bench_aabb_iter_one(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-SIZE, SIZE) {
             for y in range_inclusive(-SIZE, SIZE) {
@@ -599,7 +610,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_sphere_build(bench: &mut Bencher) {
+    fn bench_sphere_build(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-SIZE, SIZE) {
@@ -618,7 +629,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_sphere_build_add_only(bench: &mut Bencher) {
+    fn bench_sphere_build_add_only(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
             for x in range_inclusive(-SIZE, SIZE) {
@@ -637,7 +648,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_sphere_iter_half(bench: &mut Bencher) {
+    fn bench_sphere_iter_half(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-SIZE, SIZE) {
             for y in range_inclusive(-SIZE, SIZE) {
@@ -664,7 +675,7 @@ mod bvh {
     }
 
     #[bench]
-    fn bench_sphere_iter_one(bench: &mut Bencher) {
+    fn bench_sphere_iter_one(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
         for x in range_inclusive(-SIZE, SIZE) {
             for y in range_inclusive(-SIZE, SIZE) {

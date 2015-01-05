@@ -209,8 +209,10 @@ pub struct Uniform2DCollideIterator<'a, C:'a, V:'a> {
     cell: Option<i32>
 }
 
-impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator<(&'a C, &'a V)> for Uniform2DCollideIterator<'a, C, V> {
-    #[inline(never)]
+impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator for Uniform2DCollideIterator<'a, C, V> {
+    type Item = (&'a C, &'a V);
+
+    #[inline]
     fn next(&mut self) -> Option<(&'a C, &'a V)> {
         loop {
             while let Some(idx) = self.cell {
@@ -251,8 +253,10 @@ pub struct Uniform2DIterator<'a, C:'a, V:'a> {
     head: Option<i32>
 }
 
-impl<'a, C: Center<Point2<f32>>, V> Iterator<(&'a C, &'a V)> for Uniform2DIterator<'a, C, V> {
-    #[inline(never)]
+impl<'a, C: Center<Point2<f32>>, V> Iterator for Uniform2DIterator<'a, C, V> {
+    type Item = (&'a C, &'a V);
+
+    #[inline]
     fn next(&mut self) -> Option<(&'a C, &'a V)> {
         loop {
             while let Some(idx) = self.head {

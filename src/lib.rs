@@ -1,5 +1,6 @@
 //! A collision detection library for rust
 #![feature(old_orphan_check)]
+#![feature(associated_types)]
 
 extern crate core;
 extern crate cgmath;
@@ -17,7 +18,6 @@ pub mod bvh;
 pub mod aabb;
 pub mod sphere;
 pub mod uniform;
-#[cfg(test)] mod tests;
 
 pub mod octtree {
     pub use linear::Linear;

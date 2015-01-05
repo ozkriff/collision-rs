@@ -392,7 +392,9 @@ pub struct CollisionIter<'a, S:'a, K:'a, V:'a> {
     bt: Vec<CollisionNodeIter<'a, S, K, V>>
 }
 
-impl<'a, S, K, V> Iterator<(&'a K, &'a V)> for CollisionIter<'a, S, K, V> {
+impl<'a, S, K, V> Iterator for CollisionIter<'a, S, K, V> {
+    type Item = (&'a K, &'a V);
+
     fn next(&mut self) -> Option<(&'a K, &'a V)> {
         loop {
             let new = match self.bt.last_mut() {
