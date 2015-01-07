@@ -48,8 +48,9 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         (data, child)
     }
 
-    #[inline(always)]
-    fn action_mut(&mut self, c: Point3<S>, scale: S, key: &K, cb: |&mut Node<S, K, V>, Point3<S>, S|) {
+    #[inline]
+    fn action_mut<F>(&mut self, c: Point3<S>, scale: S, key: &K, mut cb: F)
+        where F: FnMut(&mut Node<S, K, V>, Point3<S>, S) {
         let hscale = scale / (FromPrimitive::from_uint(2).unwrap());
 
         let (lt_x, gt_x) = key.check_x(c.x, scale.clone());
@@ -98,8 +99,9 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         }
     }
 
-    #[inline(always)]
-    fn action<Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: |&Node<S, K, V>, Point3<S>, S|) {
+    #[inline]
+    fn action<F, Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, mut cb: F)
+        where F: FnMut(&Node<S, K, V>, Point3<S>, S) {
         let hscale = scale / (FromPrimitive::from_uint(2).unwrap());
 
         let (lt_x, gt_x) = key.check_x(c.x, scale.clone());
@@ -164,7 +166,8 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         );
     }
 
-    fn quary<Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
+    fn quary<F, Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, mut cb: F)
+        where F: FnMut(&K, &V) {
         self.action(c, scale, key,
             |next, next_center, next_scale| {
                 next.quary(next_center, next_scale, key, |k, v| { cb(k, v) });
@@ -205,7 +208,8 @@ impl<S: Float+BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersect
                          self.scale.clone(), &key)
     }
 
-    pub fn quary<Q: CheckRange3<S>>(&self, key: &Q, cb: |&K, &V|) {
+    pub fn quary<F, Q: CheckRange3<S>>(&self, key: &Q, cb: F)
+        where F: FnMut(&K, &V) {
         self.root.quary(Point3::new(Float::zero(), Float::zero(), Float::zero()),
                         self.scale.clone(), key, cb)
     }
@@ -330,7 +334,8 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 
     #[inline(always)]
-    fn quary<Q: CheckRange3<S>>(&self, center: Point3<S>, scale: S, key: &Q, cb: |&K, &V|) {
+    fn quary<F, Q: CheckRange3<S>>(&self, center: Point3<S>, scale: S, key: &Q, mut cb: F)
+        where F: FnMut(&K, &V) {
         match *self {
             Empty => (),
             Data(ref key, ref v) => {

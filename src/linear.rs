@@ -1,6 +1,6 @@
 use std::mem;
 use std::num::Float;
-use std::num::{FromPrimitive, one};
+use std::num::{FromPrimitive};
 
 use cgmath::{Vector3, Vector};
 use cgmath::{Point3, Point};
@@ -226,7 +226,8 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
         self._remove(Frame::start(depth, scale), &key);
     }
 
-    fn _quary<Q: CheckRange3<S>>(&self, frame: Frame<S>, key: &Q, cb: |&K, &V|) {
+    fn _quary<F, Q: CheckRange3<S>>(&self, frame: Frame<S>, key: &Q, mut cb: F)
+        where F: FnMut(&K, &V) {
         let touched = key.check3(&frame.center, frame.scale.clone());
 
         for (idx, &touch) in touched.iter().enumerate() {
@@ -245,7 +246,8 @@ impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersect
         }        
     }
 
-    pub fn quary<Q: CheckRange3<S>>(&self, key: &Q, cb: |&K, &V|) {
+    pub fn quary<F, Q: CheckRange3<S>>(&self, key: &Q, mut cb: F)
+        where F: FnMut(&K, &V) {
         let scale = self.scale.clone();
         self._quary(Frame::start(self.depth, scale), key, |k, v| { cb(k, v) });
     }
