@@ -118,7 +118,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
 
 impl<S: fmt::Show+BaseNum> fmt::Show for Sphere<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[{} - {}]", self.center, self.radius)
+        write!(f, "[{:?} - {:?}]", self.center, self.radius)
     }
 }
 
@@ -247,7 +247,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
 
 impl<S: fmt::Show+BaseNum> fmt::Show for Circle<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "[{} - {}]", self.center, self.radius)
+        write!(f, "[{:?} - {:?}]", self.center, self.radius)
     }
 }
 

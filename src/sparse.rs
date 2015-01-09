@@ -260,7 +260,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                     let mut data = Branch::new();
                     data.insert(center.clone(), scale.clone(), depth - 1, k, v);
                     data.insert(center.clone(), scale.clone(), depth - 1, key, value);
-                    Child(box data)
+                    Child(Box::new(data))
                 }
 
             },
@@ -284,7 +284,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                         new.insert(center.clone(), scale.clone(), depth - 1, k, v);
                     }
                     new.insert(center.clone(), scale.clone(), depth - 1, key, value);
-                    Child(box new)
+                    Child(Box::new(new))
                 }
             },
             Child(ref mut child) => {

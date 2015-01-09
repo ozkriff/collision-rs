@@ -26,6 +26,7 @@ pub struct Bvh<T, C> {
     reorder: Vec<(u32, u32)>
 }
 
+#[old_impl_check]
 impl
 <
     S: BaseNum + FromPrimitive,
@@ -170,6 +171,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
     }
 }
 
+#[old_impl_check]
 impl<
     S: BaseNum + FromPrimitive,
     V: Vector<S>,
@@ -247,6 +249,7 @@ pub struct BvhCollisionIter<'a, T:'a, C:'a> {
     collider: &'a C
 }
 
+#[old_impl_check]
 impl<
     'a,
     T: Clone,
