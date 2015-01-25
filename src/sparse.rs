@@ -21,7 +21,7 @@ enum Node<S, K, V> {
 pub struct Sparse<S, K, V> {
     root: Node<S, K, V>,
     scale: S,
-    max_depth: uint
+    max_depth: usize
 }
 
 impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Branch<S, K, V> {
@@ -150,7 +150,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         }
     }
 
-    fn insert(&mut self, c: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
+    fn insert(&mut self, c: Point3<S>, scale: S, depth: usize, key: &K, value: &V) {
         self.action_mut(c, scale, key,
             |next, next_center, next_scale| {
                 next.insert(next_center, next_scale, depth, key, value);
@@ -190,7 +190,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, 
 }
 
 impl<S: Float+BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Sparse<S, K, V> {
-    pub fn new(scale: S, max_depth: uint) -> Sparse<S, K, V> {
+    pub fn new(scale: S, max_depth: usize) -> Sparse<S, K, V> {
         Sparse {
             scale: scale,
             root: Empty,
@@ -247,7 +247,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>, 
 
 impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Node<S, K, V> {
     #[inline(always)]
-    fn insert(&mut self, center: Point3<S>, scale: S, depth: uint, key: &K, value: &V) {
+    fn insert(&mut self, center: Point3<S>, scale: S, depth: usize, key: &K, value: &V) {
         let new = match *self {
             Empty => {
                 Data(key.clone(), value.clone())
@@ -355,7 +355,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
 
 struct CollisionNodeIter<'a, S:'a, K:'a, V:'a> {
     node: &'a Node<S, K, V>,
-    index: uint 
+    index: usize 
 }
 
 enum NodeIterData<'a, S:'a, K:'a, V:'a> {

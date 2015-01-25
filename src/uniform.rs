@@ -49,7 +49,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
 
     fn link(&mut self, item: Item<C, V>) -> i32 {
         if let Some(idx) = self.free.pop() {
-            self.items[idx as uint] = item;
+            self.items[idx as usize] = item;
             idx
         } else {
             let last = self.items.len();
@@ -66,7 +66,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
         }
     }
 
-    fn idx(&self, collider: &C) -> Option<uint> {
+    fn idx(&self, collider: &C) -> Option<usize> {
         let pt = collider.center();
         let x = self.get_offset(pt.x);
         let y = self.get_offset(pt.y);
@@ -76,7 +76,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             _ => return None
         };
 
-        Some((x * self.size + y) as uint)
+        Some((x * self.size + y) as usize)
     }
 
     pub fn insert(&mut self, collider: C, value: V) {
@@ -116,13 +116,13 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
 
 
 impl<C: Center<Point2<f32>>, V: Eq> Uniform2D<C, V> {
-    fn find(&self, idx: uint, v: &V) -> Option<i32> {
+    fn find(&self, idx: usize, v: &V) -> Option<i32> {
         let mut start = self.grid[idx];
         while let Some(idx) = start {
-            if &self.items[idx as uint].value == v {
+            if &self.items[idx as usize].value == v {
                 return Some(idx);
             }
-            start = self.items[idx as uint].next
+            start = self.items[idx as usize].next
         }
         None
     }
@@ -140,18 +140,18 @@ impl<C: Center<Point2<f32>>, V: Eq> Uniform2D<C, V> {
             let mut start = self.grid[idx];
             if let Some(s) = start {
                 if s == i {
-                    self.grid[idx] = self.items[i as uint].next;
+                    self.grid[idx] = self.items[i as usize].next;
                     return true;
                 }
             }
 
             // remove link if it is linked in the items
             while let Some(s) = start {
-                if self.items[s as uint].next == Some(i) {
-                    self.items[s as uint].next = self.items[i as uint].next;
+                if self.items[s as usize].next == Some(i) {
+                    self.items[s as usize].next = self.items[i as usize].next;
                     return true;
                 }
-                start = self.items[s as uint].next
+                start = self.items[s as usize].next
             }
         }
         false
@@ -184,7 +184,7 @@ impl<C: Center<Point2<f32>>, V: Clone+Eq> Uniform2D<C, V> {
 
         let idx = new_idx;
         if let Some(i) = self.find(idx, value) {
-            self.items[i as uint].collider = new;
+            self.items[i as usize].collider = new;
         } else {
             panic!()
         }
@@ -216,7 +216,7 @@ impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator for Uniform2DCollideI
     fn next(&mut self) -> Option<(&'a C, &'a V)> {
         loop {
             while let Some(idx) = self.cell {
-                let cell = &self.grid.items[idx as uint];
+                let cell = &self.grid.items[idx as usize];
                 self.cell = cell.next;
 
                 if self.collide.intersect(&cell.collider) {
@@ -240,7 +240,7 @@ impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator for Uniform2DCollideI
             let y = self.grid.in_range(y + self.y as i32);
 
             self.cell = match (x, y) {
-                (Some(x), Some(y)) => self.grid.grid[(x*self.grid.size+y) as uint],
+                (Some(x), Some(y)) => self.grid.grid[(x*self.grid.size+y) as usize],
                 _ => None
             };
         }
@@ -249,7 +249,7 @@ impl<'a, C: Center<Point2<f32>>+Intersects<C>, V> Iterator for Uniform2DCollideI
 
 pub struct Uniform2DIterator<'a, C:'a, V:'a> {
     grid: &'a Uniform2D<C, V>,
-    idx: Range<uint>,
+    idx: Range<usize>,
     head: Option<i32>
 }
 
@@ -260,7 +260,7 @@ impl<'a, C: Center<Point2<f32>>, V> Iterator for Uniform2DIterator<'a, C, V> {
     fn next(&mut self) -> Option<(&'a C, &'a V)> {
         loop {
             while let Some(idx) = self.head {
-                let cell = &self.grid.items[idx as uint];
+                let cell = &self.grid.items[idx as usize];
                 self.head = cell.next;
 
                 return Some((&cell.collider, &cell.value));

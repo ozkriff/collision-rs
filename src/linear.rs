@@ -31,7 +31,7 @@ impl<K: Clone+Send+Sync, V: Clone+Send+Sync> Clone for Node<K, V> {
 
 pub struct Linear<S, K, V> {
     scale: S,
-    depth: uint,
+    depth: usize,
     data: Vec<Node<K, V>>
 }
 
@@ -45,7 +45,7 @@ impl<S: Clone, K: Clone+Send+Sync, V: Clone+Send+Sync> Clone for Linear<S, K, V>
     }
 }
 
-fn calc_size(depth: uint) -> uint {
+fn calc_size(depth: usize) -> usize {
     if depth == 0 {
         return 0;
     }
@@ -64,14 +64,14 @@ fn calc_size(depth: uint) -> uint {
 struct Frame<S> {
     center: Point3<S>,
     scale: S,
-    base: uint,
-    search: uint,
-    left: uint
+    base: usize,
+    search: usize,
+    left: usize
 }
 
 
 impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
-    fn start(depth: uint, scale: S) -> Frame<S> {
+    fn start(depth: usize, scale: S) -> Frame<S> {
         Frame {
             center: Point3::new(Float::zero(), Float::zero(), Float::zero()),
             scale: scale,
@@ -81,7 +81,7 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
         }
     }
 
-    fn next(&self, idx: uint) -> Frame<S> {
+    fn next(&self, idx: usize) -> Frame<S> {
         assert!(self.left != 0);
         let hscale = self.scale / (FromPrimitive::from_uint(2).unwrap());
         let one: S = Float::one();
@@ -102,13 +102,13 @@ impl<S: Float+FromPrimitive+BaseNum> Frame<S> {
         }
     }
 
-    fn addr(&self, idx: uint) -> uint {
+    fn addr(&self, idx: usize) -> usize {
         self.base + self.search + idx
     }
 }
 
 impl<S: Float+FromPrimitive+BaseNum, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+PartialEq, V: Clone+Send+Sync> Linear<S, K, V> {
-    pub fn new(size: S, depth: uint) -> Linear<S, K, V> {
+    pub fn new(size: S, depth: usize) -> Linear<S, K, V> {
         assert!(depth != 0);
         let elements = calc_size(depth);
 

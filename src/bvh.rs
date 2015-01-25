@@ -20,7 +20,7 @@ pub struct BvhBuilder<T, C, P> {
 }
 
 pub struct Bvh<T, C> {
-    depth: uint,
+    depth: usize,
     data: Vec<(C, Option<T>)>,
     _data: Vec<(C, Option<T>)>,
     reorder: Vec<(u32, u32)>
@@ -72,7 +72,7 @@ impl
                 self._data.push(
                     if idx & 0x1 == 0 {
                         let &(_, v) = reorder_iter.next().unwrap();
-                        let (ref aabb, ref dat) = self.data[v as uint];
+                        let (ref aabb, ref dat) = self.data[v as usize];
                         (aabb.clone(), dat.clone())
                     } else {
                         (Default::default(), None)
@@ -179,7 +179,7 @@ impl<
     T: Clone,
     C: Merge+Center<P>+Intersects<C>+Default+Max<P>+Min<P>+Clone
 > Bvh<T, C> {
-    fn depth(&self, idx: uint) -> uint {
+    fn depth(&self, idx: usize) -> usize {
         let mut depth = 0;
         let mut mask = 0b1;
         loop {
@@ -194,7 +194,7 @@ impl<
         depth  
     }
 
-    fn children(&self, idx: uint) -> (uint, uint) {
+    fn children(&self, idx: usize) -> (usize, usize) {
         let depth = self.depth(idx);
 
         let mut half = 2u.pow(depth-1);
@@ -243,9 +243,9 @@ impl<
 
 pub struct BvhCollisionIter<'a, T:'a, C:'a> {
     tree: &'a Bvh<T, C>,
-    bt: uint,
-    last: uint,
-    parent: Vec<uint>,
+    bt: usize,
+    last: usize,
+    parent: Vec<usize>,
     collider: &'a C
 }
 
