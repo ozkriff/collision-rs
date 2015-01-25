@@ -100,7 +100,7 @@ impl<S: Float+BaseNum> Aabb<S, Vector2<S>, Point2<S>> for Aabb2<S> {
     }
 }
 
-impl<S: fmt::Show+BaseNum> fmt::Show for Aabb2<S> {
+impl<S: fmt::Debug+BaseNum> fmt::Debug for Aabb2<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.min, self.max)
     }
@@ -165,7 +165,7 @@ impl<S: Float+BaseNum> Aabb<S, Vector3<S>, Point3<S>> for Aabb3<S> {
     }
 }
 
-impl<S: fmt::Show+BaseNum> fmt::Show for Aabb3<S> {
+impl<S: fmt::Debug+BaseNum> fmt::Debug for Aabb3<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.min, self.max)
     }

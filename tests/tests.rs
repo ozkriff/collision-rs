@@ -1,3 +1,5 @@
+#![allow(unstable)]
+
 extern crate collision;
 extern crate cgmath;
 
@@ -96,27 +98,27 @@ mod sparse {
 
     use cgmath::Point3;
 
-    const SIZE: int = 5;
+    const SIZE: isize = 5;
 
     #[test]
     fn test_insert_points()
     {
-        let mut oct: Sparse<f32, Point3<f32>, (int, int, int)> = Sparse::new(SIZE as f32, 8);
+        let mut oct: Sparse<f32, Point3<f32>, (isize, isize, isize)> = Sparse::new(SIZE as f32, 8);
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
                     oct.insert(point, (x, y, z));
                 }
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!(*value == (x, y, z));
                     });
                 }
@@ -127,42 +129,42 @@ mod sparse {
     #[test]
     fn test_remove_points()
     {
-        let mut oct: Sparse<f32, Point3<f32>, (int, int, int)> = Sparse::new(SIZE as f32, 8);
+        let mut oct: Sparse<f32, Point3<f32>, (isize, isize, isize)> = Sparse::new(SIZE as f32, 8);
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
                     oct.insert(point, (x, y, z));
                 }
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!(*value == (x, y, z));
                     });
                 }
             }
         }
 
-        for x in range(0, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (0..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
                     oct.remove(point);
                 }
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Point3::new(x as f32, y as f32, z as f32);
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         let (x, _, _) = *value;
                         assert!(x < 0);
                     });
@@ -174,11 +176,11 @@ mod sparse {
     #[test]
     fn test_insert_aabb()
     {
-        let mut oct: Sparse<f32, Aabb3<f32>, (int, int, int)> = Sparse::new((8*SIZE) as f32, 8);
+        let mut oct: Sparse<f32, Aabb3<f32>, (isize, isize, isize)> = Sparse::new((8*SIZE) as f32, 8);
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.insert(point, (x, y, z));
@@ -186,12 +188,12 @@ mod sparse {
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!(*value == (x, y, z));
                     });
                 }
@@ -202,11 +204,11 @@ mod sparse {
     #[test]
     fn test_remove_aabb()
     {
-        let mut oct: Sparse<f32, Aabb3<f32>, (int, int, int)> = Sparse::new((8*SIZE) as f32, 8);
+        let mut oct: Sparse<f32, Aabb3<f32>, (isize, isize, isize)> = Sparse::new((8*SIZE) as f32, 8);
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.insert(point, (x, y, z));
@@ -214,21 +216,21 @@ mod sparse {
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!(*value == (x, y, z));
                     });
                 }
             }
         }
 
-        for x in range(0, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (0..SIZE) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x-1) as f32, (5*y-1) as f32, (5*z-1) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.remove(point);
@@ -236,12 +238,12 @@ mod sparse {
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new(x as f32, y as f32, z as f32),
                                            Point3::new(x as f32 + 0.1, y as f32 + 0.1, z as f32 + 0.1));
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         let (x, _, _) = *value;
                         assert!(x < 0);
                     });
@@ -250,6 +252,7 @@ mod sparse {
         }
     }
 }
+
 
 mod linear {
     extern crate collision;
@@ -260,26 +263,26 @@ mod linear {
 
     use cgmath::Point3;
 
-    static SIZE: int = 3;
+    static SIZE: isize = 3;
 
     #[test]
     fn test_insert_points() {
-        let mut oct: Linear<f32, Point3<f32>, (int, int, int)> = Linear::new(SIZE as f32, 3);
+        let mut oct: Linear<f32, Point3<f32>, (isize, isize, isize)> = Linear::new(SIZE as f32, 3);
 
-        for x in range(-SIZE, SIZE) {
-            for y in range(-SIZE, SIZE) {
-                for z in range(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE) {
+            for y in (-SIZE..SIZE) {
+                for z in (-SIZE..SIZE) {
                     let point = Point3::new((x+1) as f32 , (y+1) as f32 , (z+1) as f32 );
                     oct.insert(point, (x, y, z));
                 }
             }
         }
 
-        for x in range(-SIZE, SIZE) {
-            for y in range(-SIZE, SIZE) {
-                for z in range(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE) {
+            for y in (-SIZE..SIZE) {
+                for z in (-SIZE..SIZE) {
                     let point = Point3::new((x+1) as f32 , (y+1) as f32 , (z+1) as f32 );
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!((x, y, z) == *value);
                     });
                 }
@@ -289,11 +292,11 @@ mod linear {
 
     #[test]
     fn test_insert_aabb() {
-        let mut oct: Linear<f32, Aabb3<f32>, (int, int, int)> = Linear::new((5*SIZE) as f32, 3);
+        let mut oct: Linear<f32, Aabb3<f32>, (isize, isize, isize)> = Linear::new((5*SIZE) as f32, 3);
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
                     oct.insert(point, (x, y, z));
@@ -301,12 +304,12 @@ mod linear {
             }
         }
 
-        for x in range(-SIZE, SIZE+1) {
-            for y in range(-SIZE, SIZE+1) {
-                for z in range(-SIZE, SIZE+1) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let point = Aabb3::new(Point3::new((5*x) as f32, (5*y) as f32, (5*z) as f32),
                                            Point3::new((5*x+1) as f32, (5*y+1) as f32, (5*z+1) as f32));
-                    oct.quary(&point, |_, value| {
+                    oct.quary(&point, &mut |_, value| {
                         assert!(*value == (x, y, z));
                     });
                 }
@@ -322,7 +325,6 @@ mod bvh {
 
     use std::num::Float;
     use std::collections::HashSet;
-    use std::iter::range_inclusive;
 
     use cgmath::Point3;
     use cgmath::Vector3;
@@ -332,7 +334,7 @@ mod bvh {
     use collision::bvh::{BvhBuilder, ToMorton};
     use collision::Intersects;
 
-    static SIZE: int = 10;
+    static SIZE: isize = 10;
 
     #[test]
     fn test_to_morton3() {
@@ -356,9 +358,9 @@ mod bvh {
     #[test]
     fn test_aabb_bvh_build() {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -377,9 +379,9 @@ mod bvh {
         let mut set = HashSet::new();
 
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -410,9 +412,9 @@ mod bvh {
         let check = Aabb3::new(Point3::new(0. as f32, 0. as f32, 0. as f32),
                                Point3::new(SIZE as f32, SIZE as f32, SIZE as f32));
 
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -437,9 +439,9 @@ mod bvh {
     #[test]
     fn test_sphere_bvh_build() {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -457,9 +459,9 @@ mod bvh {
         let mut set = HashSet::new();
 
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -488,9 +490,9 @@ mod bvh {
         let check = Sphere::new(Point3::new(0f32, 0f32, 0f32),
                                 0.5 * ((SIZE*SIZE + SIZE*SIZE + SIZE*SIZE) as f32).sqrt());
 
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -515,9 +517,9 @@ mod bvh {
     fn bench_aabb_build(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
-            for x in range_inclusive(-SIZE, SIZE) {
-                for y in range_inclusive(-SIZE, SIZE) {
-                    for z in range_inclusive(-SIZE, SIZE) {
+            for x in (-SIZE..SIZE+1) {
+                for y in (-SIZE..SIZE+1) {
+                    for z in (-SIZE..SIZE+1) {
                         let xf = x as f32;
                         let yf = y as f32;
                         let zf = z as f32;
@@ -535,9 +537,9 @@ mod bvh {
     fn bench_aabb_build_add_only(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
-            for x in range_inclusive(-SIZE, SIZE) {
-                for y in range_inclusive(-SIZE, SIZE) {
-                    for z in range_inclusive(-SIZE, SIZE) {
+            for x in (-SIZE..SIZE+1) {
+                for y in (-SIZE..SIZE+1) {
+                    for z in (-SIZE..SIZE+1) {
                         let xf = x as f32;
                         let yf = y as f32;
                         let zf = z as f32;
@@ -554,9 +556,9 @@ mod bvh {
     #[bench]
     fn bench_aabb_iter_half(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -572,7 +574,7 @@ mod bvh {
                                Point3::new(SIZE as f32, SIZE as f32, SIZE as f32));
         
         bench.iter(|| {
-            let mut sum = 0i;
+            let mut sum = 0is;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -583,9 +585,9 @@ mod bvh {
     #[bench]
     fn bench_aabb_iter_one(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -601,7 +603,7 @@ mod bvh {
                                Point3::new(1. as f32, 1. as f32, 1. as f32));
         
         bench.iter(|| {
-            let mut sum = 0i;
+            let mut sum = 0is;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -613,9 +615,9 @@ mod bvh {
     fn bench_sphere_build(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
-            for x in range_inclusive(-SIZE, SIZE) {
-                for y in range_inclusive(-SIZE, SIZE) {
-                    for z in range_inclusive(-SIZE, SIZE) {
+            for x in (-SIZE..SIZE+1) {
+                for y in (-SIZE..SIZE+1) {
+                    for z in (-SIZE..SIZE+1) {
                         let xf = x as f32;
                         let yf = y as f32;
                         let zf = z as f32;
@@ -632,9 +634,9 @@ mod bvh {
     fn bench_sphere_build_add_only(bench: &mut test::Bencher) {
         bench.iter(|| {
             let mut builder = BvhBuilder::new();
-            for x in range_inclusive(-SIZE, SIZE) {
-                for y in range_inclusive(-SIZE, SIZE) {
-                    for z in range_inclusive(-SIZE, SIZE) {
+            for x in (-SIZE..SIZE+1) {
+                for y in (-SIZE..SIZE+1) {
+                    for z in (-SIZE..SIZE+1) {
                         let xf = x as f32;
                         let yf = y as f32;
                         let zf = z as f32;
@@ -650,9 +652,9 @@ mod bvh {
     #[bench]
     fn bench_sphere_iter_half(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -666,7 +668,7 @@ mod bvh {
         let check = Sphere::new(Point3::new(0. as f32, 0. as f32, 0. as f32), SIZE as f32);
         
         bench.iter(|| {
-            let mut sum = 0i;
+            let mut sum = 0is;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }
@@ -677,9 +679,9 @@ mod bvh {
     #[bench]
     fn bench_sphere_iter_one(bench: &mut test::Bencher) {
         let mut builder = BvhBuilder::new();
-        for x in range_inclusive(-SIZE, SIZE) {
-            for y in range_inclusive(-SIZE, SIZE) {
-                for z in range_inclusive(-SIZE, SIZE) {
+        for x in (-SIZE..SIZE+1) {
+            for y in (-SIZE..SIZE+1) {
+                for z in (-SIZE..SIZE+1) {
                     let xf = x as f32;
                     let yf = y as f32;
                     let zf = z as f32;
@@ -693,7 +695,7 @@ mod bvh {
         let check = Sphere::new(Point3::new(0f32, 0f32, 0f32), 0.25);
         
         bench.iter(|| {
-            let mut sum = 0i;
+            let mut sum = 0is;
             for (_, _) in bvh.collision_iter(&check) {
                 sum += 1;
             }

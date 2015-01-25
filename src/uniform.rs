@@ -284,19 +284,19 @@ mod tests {
 
     #[test]
     fn get_offset() {
-        let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
+        let grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(2, 1.);
         assert_eq!(grid.get_offset(0.), Some(1));
         assert_eq!(grid.get_offset(-1.), Some(0));
         assert_eq!(grid.get_offset(1.), None);
 
-        let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 2.);
+        let grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(2, 2.);
         assert_eq!(grid.get_offset(0.), Some(1));
         assert_eq!(grid.get_offset(-1.), Some(0));
         assert_eq!(grid.get_offset(-2.), Some(0));
         assert_eq!(grid.get_offset(1.), Some(1));
         assert_eq!(grid.get_offset(2.), None);
 
-        let grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(4, 2.);
+        let grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(4, 2.);
         assert_eq!(grid.get_offset(0.), Some(2));
         assert_eq!(grid.get_offset(-1.), Some(1));
         assert_eq!(grid.get_offset(-2.), Some(0));
@@ -306,16 +306,16 @@ mod tests {
 
     #[test]
     fn insert() {
-        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0i),
-                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1i),
-                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2i)];
+        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0is),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1is),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2is)];
 
-        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
+        let mut grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(2, 1.);
         for &(k, v) in to_find.iter() {
             grid.insert(k, v);
         }
 
-        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2].iter().map(|&x| x).collect();
         for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
             set.remove(v);
         }
@@ -324,37 +324,37 @@ mod tests {
 
     #[test]
     fn remove() {
-        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0i),
-                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1i),
-                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2i)];
+        let to_find = vec![(Circle::new(Point2::new(0f32, 0f32), 1f32), 0is),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 1is),
+                           (Circle::new(Point2::new(0f32, 0f32), 1f32), 2is)];
 
-        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(2, 1.);
+        let mut grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(2, 1.);
         for &(k, v) in to_find.iter() {
             grid.insert(k, v);
         }
 
-        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2].iter().map(|&x| x).collect();
         for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
             set.remove(v);
         }
         assert_eq!(set.len(), 0);
 
         grid.remove(&to_find[0].0, &to_find[0].1);
-        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2].iter().map(|&x| x).collect();
         for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
             set.remove(v);
         }
         assert_eq!(set.len(), 1);
 
         grid.remove(&to_find[2].0, &to_find[2].1);
-        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2].iter().map(|&x| x).collect();
         for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
             set.remove(v);
         }
         assert_eq!(set.len(), 2);
 
         grid.remove(&to_find[1].0, &to_find[1].1);
-        let mut set: HashSet<int> = [0, 1, 2].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2].iter().map(|&x| x).collect();
         for (_, v) in grid.collision_iter(&Circle::new(Point2::new(0f32, 0f32), 1f32)) {
             set.remove(v);
         }
@@ -363,22 +363,22 @@ mod tests {
 
     #[test]
     fn update() {
-        let old = vec![(Circle::new(Point2::new(0f32, 0f32), 0.1f32), 0i),
-                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 1i),
-                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 2i),
-                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 3i)];
+        let old = vec![(Circle::new(Point2::new(0f32, 0f32), 0.1f32), 0is),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 1is),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 2is),
+                       (Circle::new(Point2::new(0f32, 0f32), 0.1f32), 3is)];
 
-        let new = vec![(Circle::new(Point2::new(1f32, 1f32), 0.1f32), 0i),
-                       (Circle::new(Point2::new(-1f32, 1f32), 0.1f32), 1i),
-                       (Circle::new(Point2::new(1f32, -1f32), 0.1f32), 2i),
-                       (Circle::new(Point2::new(-1f32, -1f32), 0.1f32), 3i)];
+        let new = vec![(Circle::new(Point2::new(1f32, 1f32), 0.1f32), 0is),
+                       (Circle::new(Point2::new(-1f32, 1f32), 0.1f32), 1is),
+                       (Circle::new(Point2::new(1f32, -1f32), 0.1f32), 2is),
+                       (Circle::new(Point2::new(-1f32, -1f32), 0.1f32), 3is)];
 
-        let mut grid: Uniform2D<Circle<f32>, int> = Uniform2D::new(4, 2.);
+        let mut grid: Uniform2D<Circle<f32>, isize> = Uniform2D::new(4, 2.);
         for &(k, v) in old.iter() {
             grid.insert(k, v);
         }
 
-        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2, 3].iter().map(|&x| x).collect();
         for &(ref k, _) in old.iter() {
             for (_, v) in grid.collision_iter(k) {
                 set.remove(v);
@@ -391,7 +391,7 @@ mod tests {
             grid.update(&ko, kn, &vn);
         }
 
-        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2, 3].iter().map(|&x| x).collect();
         for &(ref k, _) in old.iter() {
             for (_, v) in grid.collision_iter(k) {
                 set.remove(v);
@@ -404,7 +404,7 @@ mod tests {
             grid.update(&ko, kn, &vn);
         }
 
-        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2, 3].iter().map(|&x| x).collect();
         for &(ref pk, _) in old.iter() {
             for (_, v) in grid.collision_iter(pk) {
                 set.remove(v);
@@ -412,7 +412,7 @@ mod tests {
         }
         assert_eq!(set.len(), 4);
 
-        let mut set: HashSet<int> = [0, 1, 2, 3].iter().map(|&x| x).collect();
+        let mut set: HashSet<isize> = [0, 1, 2, 3].iter().map(|&x| x).collect();
         for &(ref pk, _) in new.iter() {
             for (_, v) in grid.collision_iter(pk) {
                 set.remove(v);

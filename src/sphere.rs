@@ -26,7 +26,7 @@ impl<S> Sphere<S> {
     }
 }
 
-impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Sphere<S> {
+impl<S: BaseNum+BaseFloat+fmt::Debug> Merge for Sphere<S> {
     fn merge(&self, other: &Sphere<S>) -> Sphere<S> {
         let diff = other.center.sub_p(&self.center);
         let dist = diff.length();
@@ -116,7 +116,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
     }
 }
 
-impl<S: fmt::Show+BaseNum> fmt::Show for Sphere<S> {
+impl<S: fmt::Debug+BaseNum> fmt::Debug for Sphere<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.center, self.radius)
     }
@@ -157,7 +157,7 @@ impl<S> Circle<S> {
     }
 }
 
-impl<S: BaseNum+BaseFloat+fmt::Show> Merge for Circle<S> {
+impl<S: BaseNum+BaseFloat+fmt::Debug> Merge for Circle<S> {
     fn merge(&self, other: &Circle<S>) -> Circle<S> {
         let diff = other.center.sub_p(&self.center);
         let dist = diff.length();
@@ -245,7 +245,7 @@ impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
     }
 }
 
-impl<S: fmt::Show+BaseNum> fmt::Show for Circle<S> {
+impl<S: fmt::Debug+BaseNum> fmt::Debug for Circle<S> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{:?} - {:?}]", self.center, self.radius)
     }

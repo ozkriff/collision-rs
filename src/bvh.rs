@@ -82,14 +82,14 @@ impl
 
             let mut step = 1;
             loop {
-                let reach = 2u.pow(step);
-                let half_reach = 2u.pow(step-1);
+                let reach = 2us.pow(step);
+                let half_reach = 2us.pow(step-1);
 
                 if reach > self._data.len() {
                     break
                 }
 
-                for i in range_step(reach-1, self._data.len(), 2u.pow(step+1)) {
+                for i in range_step(reach-1, self._data.len(), 2us.pow(step+1)) {
                     let left = i - half_reach;
                     let mut right = i + half_reach;
                     let mut hr = half_reach;
@@ -138,7 +138,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point3<S>, Vector3<S>> for Point3<S> {
             let mut out = 0;
             let mut mask = 0b1;
             let mut rotate = 0;
-            for _ in range(0i, 10) {
+            for _ in (0is..10) {
                 out |= (val & mask) << rotate;
                 mask <<= 1;
                 rotate += 2;
@@ -158,7 +158,7 @@ impl<S: BaseNum+NumCast> ToMorton<Point2<S>, Vector2<S>> for Point2<S> {
             let mut out = 0;
             let mut mask = 0b1;
             let mut rotate = 0;
-            for _ in range(0i, 10) {
+            for _ in (0is..10) {
                 out |= (val & mask) << rotate;
                 mask <<= 1;
                 rotate += 1;
@@ -197,7 +197,7 @@ impl<
     fn children(&self, idx: usize) -> (usize, usize) {
         let depth = self.depth(idx);
 
-        let mut half = 2u.pow(depth-1);
+        let mut half = 2us.pow(depth-1);
         let left = idx - half;
         let mut right = idx + half;
 
@@ -212,8 +212,8 @@ impl<
 
     pub fn collision_iter<'a>(&'a self, collider: &'a C) -> BvhCollisionIter<'a, T, C> {
         BvhCollisionIter {
-            bt: 2u.pow(self.depth) - 1,
-            last: 2u.pow(self.depth+1),
+            bt: 2us.pow(self.depth) - 1,
+            last: 2us.pow(self.depth+1),
             parent: Vec::new(),
             tree: self,
             collider: collider

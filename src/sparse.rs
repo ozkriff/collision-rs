@@ -32,7 +32,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         }
     }
 
-    fn count(&self) -> (int, int) {
+    fn count(&self) -> (isize, isize) {
         let mut data = 0;
         let mut child = 0;
 
@@ -166,11 +166,11 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
         );
     }
 
-    fn quary<F, Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, mut cb: F)
+    fn quary<F, Q: CheckRange3<S>>(&self, c: Point3<S>, scale: S, key: &Q, cb: &mut F)
         where F: FnMut(&K, &V) {
         self.action(c, scale, key,
             |next, next_center, next_scale| {
-                next.quary(next_center, next_scale, key, |k, v| { cb(k, v) });
+                next.quary(next_center, next_scale, key, cb);
             }
         );
     }
@@ -208,7 +208,7 @@ impl<S: Float+BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersect
                          self.scale.clone(), &key)
     }
 
-    pub fn quary<F, Q: CheckRange3<S>>(&self, key: &Q, cb: F)
+    pub fn quary<F, Q: CheckRange3<S>>(&self, key: &Q, cb: &mut F)
         where F: FnMut(&K, &V) {
         self.root.quary(Point3::new(Float::zero(), Float::zero(), Float::zero()),
                         self.scale.clone(), key, cb)
@@ -334,7 +334,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
     }
 
     #[inline(always)]
-    fn quary<F, Q: CheckRange3<S>>(&self, center: Point3<S>, scale: S, key: &Q, mut cb: F)
+    fn quary<F, Q: CheckRange3<S>>(&self, center: Point3<S>, scale: S, key: &Q, cb: &mut F)
         where F: FnMut(&K, &V) {
         match *self {
             Empty => (),
@@ -347,7 +347,7 @@ impl<S: BaseNum+FromPrimitive, K: Clone+Send+Sync+CheckRange3<S>+Intersects<K>+P
                 }
             },
             Child(ref child) => {
-                child.quary(center, scale, key, |k, v| { cb(k, v) });
+                child.quary(center, scale, key, cb);
             }
         }
     }
