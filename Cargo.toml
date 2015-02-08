@@ -1,12 +1,10 @@
 [package]
 name = "collision"
-version = "0.0.3"
+version = "0.0.4"
 authors = ["Colin Sherratt"]
 license = "Apache 2"
 description = "A Collision detection library derived from cgmath"
 
-[dependencies.cgmath]
-git = "https://github.com/bjz/cgmath-rs"
-
 [dependencies]
 rustc-serialize="*"
+cgmath="*"
