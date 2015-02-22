@@ -1,7 +1,7 @@
 
 use std::fmt;
 use std::num::Float;
-use std::iter::FromIterator;
+use std::iter::{FromIterator, IntoIterator};
 use std::default::Default;
 
 use cgmath::{Point, Point3, Point2};
@@ -87,8 +87,8 @@ impl<S: BaseNum+BaseFloat> Min<Point3<S>> for Sphere<S> {
 }
 
 impl<S: BaseNum+BaseFloat> FromIterator<Point3<S>> for Sphere<S> {
-    fn from_iter<T: Iterator<Item=Point3<S>>>(iterator: T) -> Sphere<S> {
-        let mut iterator = iterator;
+    fn from_iter<T: IntoIterator<Item=Point3<S>>>(iterator: T) -> Sphere<S> {
+        let mut iterator = iterator.into_iter();
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point3::new(m.x, m.y, m.z), Point3::new(m.x, m.y, m.z)),
@@ -218,8 +218,8 @@ impl<S: BaseNum+BaseFloat> Min<Point2<S>> for Circle<S> {
 }
 
 impl<S: BaseNum+BaseFloat> FromIterator<Point2<S>> for Circle<S> {
-    fn from_iter<T: Iterator<Item=Point2<S>>>(iterator: T) -> Circle<S> {
-        let mut iterator = iterator;
+    fn from_iter<T: IntoIterator<Item=Point2<S>>>(iterator: T) -> Circle<S> {
+        let mut iterator = iterator.into_iter();
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point2::new(m.x, m.y), Point2::new(m.x, m.y)),

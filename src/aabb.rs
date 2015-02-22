@@ -17,7 +17,7 @@
 
 use std::fmt;
 use std::num::Float;
-use std::iter::{FromIterator, Iterator};
+use std::iter::{FromIterator, Iterator, IntoIterator};
 use std::default::Default;
 
 use cgmath::PartialOrd;
@@ -107,8 +107,8 @@ impl<S: fmt::Debug+BaseNum> fmt::Debug for Aabb2<S> {
 }
 
 impl<S: Float+BaseNum> FromIterator<Point2<S>> for Aabb2<S> {
-    fn from_iter<T: Iterator<Item=Point2<S>>>(iterator: T) -> Aabb2<S> {
-        let mut iterator = iterator;
+    fn from_iter<T: IntoIterator<Item=Point2<S>>>(iterator: T) -> Aabb2<S> {
+        let mut iterator = iterator.into_iter();
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point2::new(m.x, m.y), Point2::new(m.x, m.y)),
@@ -172,8 +172,8 @@ impl<S: fmt::Debug+BaseNum> fmt::Debug for Aabb3<S> {
 }
 
 impl<S: Float+BaseNum> FromIterator<Point3<S>> for Aabb3<S> {
-    fn from_iter<T: Iterator<Item=Point3<S>>>(iterator: T) -> Aabb3<S> {
-        let mut iterator = iterator;
+    fn from_iter<T: IntoIterator<Item=Point3<S>>>(iterator: T) -> Aabb3<S> {
+        let mut iterator = iterator.into_iter();
 
         let (mut max, mut min) = match iterator.next() {
             Some(m) => (Point3::new(m.x, m.y, m.z), Point3::new(m.x, m.y, m.z)),

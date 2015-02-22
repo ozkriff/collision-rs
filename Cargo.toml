@@ -2,7 +2,7 @@
 name = "collision"
 version = "0.0.4"
 authors = ["Colin Sherratt"]
-license = "Apache 2"
+license = "Apache-2.0"
 description = "A Collision detection library derived from cgmath"
 
 [dependencies]

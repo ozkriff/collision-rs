@@ -12,18 +12,9 @@ use std::num::{Float, FromPrimitive};
 use cgmath::{Point2, Point3};
 use cgmath::BaseNum;
 
-mod linear;
-mod sparse;
-pub mod bvh;
 pub mod aabb;
 pub mod sphere;
 pub mod uniform;
-
-pub mod octtree {
-    pub use linear::Linear;
-    pub use sparse::Sparse;
-    pub use sparse::CollisionIter;
-}
 
 pub trait Intersects<OTHER> {
     fn intersect(&self, other: &OTHER) -> bool;
