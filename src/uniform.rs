@@ -1,6 +1,8 @@
+#![feature(std_misc)]
+
 use cgmath::Point2;
 use super::{Center, Intersects};
-use core::iter::Range;
+use core::ops::Range;
 
 #[derive(Clone)]
 struct Item<C, V> {
@@ -27,7 +29,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
             size: size,
             items: Vec::new(),
             free: Vec::new(),
-            grid: range(0, size*size).map(|_| { None }).collect()
+            grid: (0..size*size).map(|_| { None }).collect()
         }
     }
 
@@ -108,7 +110,7 @@ impl<C: Center<Point2<f32>>, V> Uniform2D<C, V> {
     pub fn iter<'a>(&'a self) -> Uniform2DIterator<'a, C, V> {
         Uniform2DIterator {
             grid: self,
-            idx: range(0, self.grid.len()),
+            idx: (0..self.grid.len()),
             head: None
         }
     }

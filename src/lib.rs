@@ -1,6 +1,5 @@
 //! A collision detection library for rust
-#![feature(old_impl_check)]
-#![allow(unstable)]
+#![feature(std_misc, core)]
 
 extern crate core;
 extern crate cgmath;
