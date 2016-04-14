@@ -19,7 +19,7 @@ use bound::*;
 use intersect::Intersect;
 use Plane;
 use Ray3;
-use cgmath::{BaseFloat, Zero};
+use cgmath::{BaseFloat, Zero, EuclideanVector};
 use cgmath::{Point, Point3};
 use cgmath::Vector;
 

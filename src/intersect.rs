@@ -14,7 +14,7 @@
 // limitations under the License.
 
 use {Ray2, Ray3, Plane, Line2};
-use cgmath::{BaseFloat, Zero};
+use cgmath::{BaseFloat, Zero, EuclideanVector};
 use cgmath::{Point, Point2, Point3};
 use cgmath::{Vector, Vector2};
 
