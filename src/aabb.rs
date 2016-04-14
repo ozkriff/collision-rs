@@ -26,7 +26,7 @@ use cgmath::Array;
 use cgmath::{Point, Point2, Point3};
 use cgmath::{Vector, Vector2, Vector3};
 use cgmath::{Zero, One};
-use cgmath::{BaseNum, BaseFloat};
+use cgmath::{BaseNum, BaseFloat, ElementWise};
 
 use {Ray2, Plane};
 use bound::{Bound, Relation};
@@ -75,7 +75,7 @@ impl<S> MinMax for Point3<S>
     }
 }
 
-pub trait Aabb<S: BaseNum, V: Vector<Scalar=S>, P: Point<Scalar=S, Vector=V>>: Sized {
+pub trait Aabb<S: BaseNum, V: Vector<Scalar=S> + ElementWise, P: Point<Scalar=S, Vector=V>>: Sized {
     /// Create a new AABB using two points as opposing corners.
     fn new(p1: P, p2: P) -> Self;
 
@@ -127,8 +127,8 @@ pub trait Aabb<S: BaseNum, V: Vector<Scalar=S>, P: Point<Scalar=S, Vector=V>>: S
 
     /// Multiply every point in the AABB by a vector, returning a new AABB.
     fn mul_v(&self, v: V) -> Self {
-        let min = P::from_vec(self.min().to_vec() * v);
-        let max = P::from_vec(self.max().to_vec() * v);
+        let min = P::from_vec(self.min().to_vec().mul_element_wise(v));
+        let max = P::from_vec(self.max().to_vec().mul_element_wise(v));
         Aabb::new(min, max)
     }
 }

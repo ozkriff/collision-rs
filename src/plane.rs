@@ -101,7 +101,7 @@ impl<S: BaseFloat> Plane<S> {
     pub fn normalize(&self) -> Option<Plane<S>> {
         if self.n.approx_eq(&Vector::zero()) { None }
         else {
-            let denom = one::<S>() / self.n.length();
+            let denom = one::<S>() / self.n.magnitude();
             Some(Plane::new(self.n * denom, self.d*denom))
         }
     }
