@@ -45,3 +45,44 @@ fn test_ray_intersection() {
     let r1: Ray3<f64> = Ray::new(Point3::new(0f64, 0f64, 0f64), Vector3::new(-1f64, 0f64, 0f64).normalize());
     assert_eq!((p1, r1).intersection(), None); // r1 points away from p1
 }
+
+#[test]
+fn test_plane2_intersection() {
+    let p0 = Plane::new(Vector3::unit_x(), 1.0f64);
+    let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
+    let ray = (p0, p1).intersection();
+    assert!(ray.is_some());
+
+    let ray = ray.unwrap();
+    assert!(ray.origin.x.approx_eq(&1.0f64));
+    assert!(ray.origin.y.approx_eq(&2.0f64));
+    assert!(ray.origin.z.approx_eq(&0.0f64));
+    assert!(ray.direction.x.approx_eq(&0.0f64));
+    assert!(ray.direction.y.approx_eq(&0.0f64));
+    assert!(ray.direction.z.approx_eq(&1.0f64));
+
+    let p0 = Plane::new(Vector3::unit_y(), 1.0f64);
+    let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
+    let ray = (p0, p1).intersection();
+    assert!(ray.is_none());
+}
+
+#[test]
+fn test_plane3_intersection() {
+    let p0 = Plane::new(Vector3::unit_x(), 1.0f64);
+    let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
+    let p2 = Plane::new(Vector3::unit_z(), 3.0f64);
+    let point = (p0, p1, p2).intersection();
+    assert!(point.is_some());
+
+    let point = point.unwrap();
+    assert!(point.x.approx_eq(&1.0f64));
+    assert!(point.y.approx_eq(&2.0f64));
+    assert!(point.z.approx_eq(&3.0f64));
+
+    let p0 = Plane::new(Vector3::unit_y(), 1.0f64);
+    let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
+    let p2 = Plane::new(Vector3::unit_z(), 3.0f64);
+    let point = (p0, p1, p2).intersection();
+    assert!(point.is_none());
+}

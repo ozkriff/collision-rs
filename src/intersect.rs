@@ -33,15 +33,35 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Plane<S>, Ray3<S>) {
     }
 }
 
+/// See _Real-Time Collision Detection_, p. 210
 impl<S: BaseFloat> Intersect<Option<Ray3<S>>> for (Plane<S>, Plane<S>) {
     fn intersection(&self) -> Option<Ray3<S>> {
-        panic!("Not yet implemented");
+        let (p1, p2) = *self;
+        let d = p1.n.cross(p2.n);
+        let denom = d.dot(d);
+        if denom.approx_eq(&S::zero()) {
+            None
+        }
+        else {
+            let p = (p2.n * p1.d - p1.n * p2.d).cross(d) / denom;
+            Some(Ray3::new(Point3::from_vec(p), d))
+        }
     }
 }
 
+/// See _Real-Time Collision Detection_, p. 212 - 214
 impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Plane<S>, Plane<S>, Plane<S>) {
     fn intersection(&self) -> Option<Point3<S>> {
-        panic!("Not yet implemented");
+        let (p1, p2, p3) = *self;
+        let u = p2.n.cross(p3.n);
+        let denom = p1.n.dot(u);
+        if denom.abs().approx_eq(&S::zero()) {
+            None
+        }
+        else {
+            let p = (u * p1.d + p1.n.cross(p2.n * p3.d - p3.n * p2.d)) / denom;
+            Some(Point3::from_vec(p))
+        }
     }
 }
 
