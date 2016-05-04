@@ -15,8 +15,8 @@
 
 use std::marker::PhantomData;
 use cgmath::BaseNum;
-use cgmath::{Point, Point2, Point3};
-use cgmath::{Vector, Vector2, Vector3};
+use cgmath::{EuclideanSpace, Point2, Point3};
+use cgmath::{VectorSpace, Vector2, Vector3};
 
 /// A generic ray starting at `origin` and extending infinitely in
 /// `direction`.
@@ -29,8 +29,8 @@ pub struct Ray<S, P, V> {
 
 impl<S, V, P> Ray<S, P, V>
     where S: BaseNum,
-          V: Vector<Scalar=S>,
-          P: Point<Scalar=S, Vector=V>
+          V: VectorSpace<Scalar=S>,
+          P: EuclideanSpace<Scalar=S, Diff=V>
 {
     pub fn new(origin: P, direction: V) -> Ray<S, P, V> {
         Ray {

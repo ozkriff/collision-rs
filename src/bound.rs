@@ -18,7 +18,7 @@
 use Plane;
 use cgmath::{Matrix4};
 use cgmath::BaseFloat;
-use cgmath::{Point, Point3};
+use cgmath::{EuclideanSpace, Point3};
 
 /// Spatial relation between two objects.
 #[derive(Copy, Clone, Debug, Eq, Hash, Ord, PartialOrd, PartialEq)]

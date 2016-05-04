@@ -21,7 +21,7 @@ use cgmath::{zero, one};
 use cgmath::{Matrix, Matrix4};
 use cgmath::BaseFloat;
 use cgmath::Point3;
-use cgmath::{EuclideanVector};
+use cgmath::{EuclideanSpace};
 use cgmath::{Angle, PerspectiveFov, Ortho, Perspective};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
