@@ -14,9 +14,9 @@
 // limitations under the License.
 
 use {Ray2, Ray3, Plane, Line2};
-use cgmath::{BaseFloat, Zero, EuclideanVector};
-use cgmath::{Point, Point2, Point3};
-use cgmath::{Vector, Vector2};
+use cgmath::{BaseFloat, Zero, EuclideanSpace};
+use cgmath::{Point2, Point3};
+use cgmath::{VectorSpace, InnerSpace, Vector2};
 
 pub trait Intersect<Result> {
     fn intersection(&self) -> Result;

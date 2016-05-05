@@ -18,8 +18,8 @@
 use std::marker::PhantomData;
 
 use cgmath::{BaseNum};
-use cgmath::{Point, Point2, Point3};
-use cgmath::{Vector, Vector2, Vector3};
+use cgmath::{EuclideanSpace, Point2, Point3};
+use cgmath::{VectorSpace, InnerSpace, Vector2, Vector3};
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq)]
@@ -30,7 +30,7 @@ pub struct Line<S, V, P> {
     phantom_v: PhantomData<V>
 }
 
-impl<S: BaseNum, V: Vector<Scalar=S>, P: Point<Scalar=S, Vector=V>>  Line<S, V, P> {
+impl<S: BaseNum, V: VectorSpace<Scalar=S>, P: EuclideanSpace<Scalar=S, Diff=V>>  Line<S, V, P> {
     pub fn new(origin: P, dest: P) -> Line<S, V, P> {
         Line {
             origin: origin,
