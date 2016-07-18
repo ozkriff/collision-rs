@@ -23,8 +23,7 @@
 use std::fmt;
 
 use cgmath::{EuclideanSpace, Point2, Point3};
-use cgmath::{VectorSpace, InnerSpace, Array, Vector2, Vector3};
-use cgmath::{Zero, One};
+use cgmath::{VectorSpace, Array, Vector2, Vector3};
 use cgmath::{BaseNum, BaseFloat, ElementWise};
 
 use {Ray2, Ray3, Plane};

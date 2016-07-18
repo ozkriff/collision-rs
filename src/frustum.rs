@@ -17,12 +17,10 @@
 
 use Plane;
 use bound::*;
-use cgmath::{zero, one};
 use cgmath::{Matrix, Matrix4};
 use cgmath::BaseFloat;
 use cgmath::Point3;
-use cgmath::{EuclideanSpace};
-use cgmath::{Angle, PerspectiveFov, Ortho, Perspective};
+use cgmath::{PerspectiveFov, Ortho, Perspective};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Frustum<S: BaseFloat> {
@@ -115,12 +113,12 @@ impl<S: BaseFloat + 'static> Projection<S> for Perspective<S> {
 impl<S: BaseFloat> Projection<S> for Ortho<S> {
     fn to_frustum(&self) -> Frustum<S> {
         Frustum {
-            left:   Plane::from_abcd( one::<S>(), zero::<S>(), zero::<S>(), self.left.clone()),
-            right:  Plane::from_abcd(-one::<S>(), zero::<S>(), zero::<S>(), self.right.clone()),
-            bottom: Plane::from_abcd(zero::<S>(),  one::<S>(), zero::<S>(), self.bottom.clone()),
-            top:    Plane::from_abcd(zero::<S>(), -one::<S>(), zero::<S>(), self.top.clone()),
-            near:   Plane::from_abcd(zero::<S>(), zero::<S>(), -one::<S>(), self.near.clone()),
-            far:    Plane::from_abcd(zero::<S>(), zero::<S>(),  one::<S>(), self.far.clone()),
+            left:   Plane::from_abcd(S::one(), S::zero(), S::zero(), self.left.clone()),
+            right:  Plane::from_abcd(-S::one(), S::zero(), S::zero(), self.right.clone()),
+            bottom: Plane::from_abcd(S::zero(), S::one(), S::zero(), self.bottom.clone()),
+            top:    Plane::from_abcd(S::zero(), -S::one(), S::zero(), self.top.clone()),
+            near:   Plane::from_abcd(S::zero(), S::zero(), -S::one(), self.near.clone()),
+            far:    Plane::from_abcd(S::zero(), S::zero(), S::one(), self.far.clone()),
         }
     }
 }

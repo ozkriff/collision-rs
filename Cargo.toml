@@ -27,4 +27,4 @@ name = "collision"
 
 [dependencies]
 num = "0.1"
-cgmath = "0.9.1"
+cgmath = "0.10.0"

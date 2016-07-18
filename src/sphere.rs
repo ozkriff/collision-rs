@@ -19,8 +19,8 @@ use bound::*;
 use intersect::Intersect;
 use Plane;
 use Ray3;
-use cgmath::{BaseFloat, Zero, EuclideanSpace};
-use cgmath::{VectorSpace, InnerSpace, Point3};
+use cgmath::{BaseFloat, EuclideanSpace};
+use cgmath::{InnerSpace, Point3};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Sphere<S: BaseFloat> {
