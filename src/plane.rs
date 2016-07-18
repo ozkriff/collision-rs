@@ -15,11 +15,11 @@
 
 use std::fmt;
 
-use cgmath::one;
 use cgmath::{ApproxEq, BaseFloat};
 use cgmath::{Point3};
 use cgmath::{Vector3, Vector4};
-use cgmath::{VectorSpace, EuclideanSpace, InnerSpace};
+use cgmath::{EuclideanSpace, InnerSpace};
+use cgmath::{Zero};
 
 
 /// A 3-dimensional plane formed from the equation: `A*x + B*y + C*z - D = 0`.
@@ -81,7 +81,7 @@ impl<S: BaseFloat> Plane<S> {
         // find the normal vector that is perpendicular to v1 and v2
         let n = v0.cross(v1);
 
-        if n.approx_eq(&VectorSpace::zero()) { None }
+        if n.approx_eq(&Vector3::zero()) { None }
         else {
             // compute the normal and the distance to the plane
             let n = n.normalize();
@@ -99,9 +99,9 @@ impl<S: BaseFloat> Plane<S> {
 
     /// Normalize a plane.
     pub fn normalize(&self) -> Option<Plane<S>> {
-        if self.n.approx_eq(&VectorSpace::zero()) { None }
+        if self.n.approx_eq(&Vector3::zero()) { None }
         else {
-            let denom = one::<S>() / self.n.magnitude();
+            let denom = S::one() / self.n.magnitude();
             Some(Plane::new(self.n * denom, self.d*denom))
         }
     }

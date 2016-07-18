@@ -19,7 +19,7 @@ use std::marker::PhantomData;
 
 use cgmath::{BaseNum};
 use cgmath::{EuclideanSpace, Point2, Point3};
-use cgmath::{VectorSpace, InnerSpace, Vector2, Vector3};
+use cgmath::{VectorSpace, Vector2, Vector3};
 
 /// A generic directed line segment from `origin` to `dest`.
 #[derive(Copy, Clone, PartialEq)]
