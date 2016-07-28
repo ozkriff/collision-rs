@@ -33,6 +33,9 @@
 extern crate cgmath;
 extern crate num;
 
+#[cfg(feature = "rustc-serialize")]
+extern crate rustc_serialize;
+
 // Re-exports
 pub use aabb::*;
 pub use bound::*;
