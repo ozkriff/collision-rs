@@ -1,7 +1,7 @@
 [package]
 
 name = "collision"
-version = "0.7.0"
+version = "0.8.0"
 authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
         "Brian Heylin",
         "Colin Sherratt",
@@ -25,6 +25,10 @@ keywords = ["gamedev", "cgmath", "collision"]
 [lib]
 name = "collision"
 
+[features]
+default = ["rustc-serialize"]
+
 [dependencies]
 num = "0.1"
 cgmath = "0.10.0"
+rustc-serialize = { version = "0.3", optional = true }
