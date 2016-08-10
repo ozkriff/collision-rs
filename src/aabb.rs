@@ -287,51 +287,39 @@ impl<S: BaseFloat> Intersect<Option<Point2<S>>> for (Ray2<S>, Aabb2<S>) {
     }
 }
 
-
 impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Ray3<S>, Aabb3<S>) {
     fn intersection(&self) -> Option<Point3<S>> {
         let (ref ray, ref aabb) = *self;
 
-        let mut tmin = S::neg_infinity();
-        let mut tmax = S::infinity();
+        let inv_dir = Vector3::new(S::one(), S::one(), S::one()).div_element_wise(ray.direction);
 
-        if ray.direction.x != S::zero() {
-            let tx1 = (aabb.min.x - ray.origin.x) / ray.direction.x;
-            let tx2 = (aabb.max.x - ray.origin.x) / ray.direction.x;
-            tmin = tmin.max(tx1.min(tx2));
-            tmax = tmax.min(tx1.max(tx2));
-        }
+        let mut t1 = (aabb.min.x - ray.origin.x) * inv_dir.x;
+        let mut t2 = (aabb.max.x - ray.origin.x) * inv_dir.x;
 
-        if ray.direction.y != S::zero() {
-            let ty1 = (aabb.min.y - ray.origin.y) / ray.direction.y;
-            let ty2 = (aabb.max.y - ray.origin.y) / ray.direction.y;
-            tmin = tmin.max(ty1.min(ty2));
-            tmax = tmax.min(ty1.max(ty2));
-        }
+        let mut tmin = t1.min(t2);
+        let mut tmax = t1.max(t2);
 
-        if ray.direction.z != S::zero() {
-            let tz1 = (aabb.min.z - ray.origin.z) / ray.direction.z;
-            let tz2 = (aabb.max.z - ray.origin.z) / ray.direction.z;
-            tmin = tmin.max(tz1.min(tz2));
-            tmax = tmax.min(tz1.max(tz2));
+        for i in 0..3 {
+            t1 = (aabb.min[i] - ray.origin[i]) * inv_dir[i];
+            t2 = (aabb.max[i] - ray.origin[i]) * inv_dir[i];
+
+            tmin = tmin.max(t1.min(t2));
+            tmax = tmax.min(t1.max(t2));
         }
 
         if tmin < S::zero() && tmax < S::zero() {
             None
-        }
-        else if tmax >= tmin {
+        } else if tmax >= tmin {
             if tmin >= S::zero() {
                 Some(Point3::new(ray.origin.x + ray.direction.x * tmin,
                                  ray.origin.y + ray.direction.y * tmin,
                                  ray.origin.z + ray.direction.z * tmin))
-            }
-            else {
+            } else {
                 Some(Point3::new(ray.origin.x + ray.direction.x * tmax,
                                  ray.origin.y + ray.direction.y * tmax,
                                  ray.origin.z + ray.direction.z * tmax))
             }
-        }
-        else {
+        } else {
             None
         }
     }

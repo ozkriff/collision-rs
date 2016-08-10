@@ -19,6 +19,7 @@ extern crate collision;
 use collision::{Aabb, Aabb2, Aabb3};
 use collision::{Bound, Relation, Plane, Ray};
 use collision::Intersect;
+use cgmath::InnerSpace;
 use cgmath::{Point2, Point3};
 use cgmath::{Vector2, Vector3};
 
@@ -67,7 +68,7 @@ fn test_general() {
 }
 
 #[test]
-fn test_ray_intersect() {
+fn test_ray2_intersect() {
     let aabb = Aabb2::new(Point2::new(-5.0f32, 5.0), Point2::new(5.0, 10.0));
     let ray1 = Ray::new(Point2::new(0.0f32, 0.0), Vector2::new(0.0, 1.0));
     let ray2 = Ray::new(Point2::new(-10.0f32, 0.0), Vector2::new(2.5, 1.0));
@@ -78,6 +79,83 @@ fn test_ray_intersect() {
     assert_eq!((ray2, aabb).intersection(), Some(Point2::new(2.5, 5.0)));
     assert_eq!((ray3, aabb).intersection(), None);
     assert_eq!((ray4, aabb).intersection(), Some(Point2::new(5.0, 9.0)));
+}
+
+#[test]
+fn test_parallel_ray3_should_not_intersect() {
+    let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
+    let ray_x = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(1.0, 0.0, 0.0));
+    let ray_y = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
+    let ray_z = Ray::new(Point3::new(0.0f32, 0.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+    let ray_z_imprecise = Ray::new(Point3::new(0.0f32, 0.0, 0.0),
+                                   Vector3::new(0.0001, 0.0001, 1.0));
+
+    assert_eq!((ray_x, aabb).intersection(), None);
+    assert_eq!((ray_y, aabb).intersection(), None);
+    assert_eq!((ray_z, aabb).intersection(), None);
+    assert_eq!((ray_z_imprecise, aabb).intersection(), None);
+}
+
+#[test]
+fn test_oblique_ray3_should_intersect() {
+    let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
+    let ray1 = Ray::new(Point3::new(0.0f32, 0.0, 0.0),
+                        Vector3::new(1.0, 1.0, 1.0).normalize());
+    let ray2 = Ray::new(Point3::new(0.0f32, 6.0, 0.0), Vector3::new(1.0, -1.0, 1.0));
+
+    assert_eq!((ray1, aabb).intersection(),
+               Some(Point3::new(1.0, 1.0, 1.0)));
+    assert_eq!((ray2, aabb).intersection(),
+               Some(Point3::new(1.0, 5.0, 1.0)));
+}
+
+#[test]
+fn test_pointing_to_other_dir_ray3_should_not_intersect() {
+    let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
+    let ray_x = Ray::new(Point3::new(0.0f32, 2.0, 2.0),
+                         Vector3::new(-1.0, 0.01, 0.01));
+    let ray_y = Ray::new(Point3::new(2.0f32, 0.0, 2.0),
+                         Vector3::new(0.01, -1.0, 0.01));
+    let ray_z = Ray::new(Point3::new(2.0f32, 2.0, 0.0),
+                         Vector3::new(0.01, 0.01, -1.0));
+
+    let ray_x2 = Ray::new(Point3::new(6.0f32, 2.0, 2.0), Vector3::new(1.0, 0.0, 0.0));
+    let ray_y2 = Ray::new(Point3::new(2.0f32, 6.0, 2.0), Vector3::new(0.0, 1.0, 0.0));
+    let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, 1.0));
+
+    assert_eq!((ray_x, aabb).intersection(), None);
+    assert_eq!((ray_y, aabb).intersection(), None);
+    assert_eq!((ray_z, aabb).intersection(), None);
+
+    assert_eq!((ray_x2, aabb).intersection(), None);
+    assert_eq!((ray_y2, aabb).intersection(), None);
+    assert_eq!((ray_z2, aabb).intersection(), None);
+}
+
+#[test]
+fn test_pointing_to_box_dir_ray3_should_intersect() {
+    let aabb = Aabb3::<f32>::new(Point3::new(1.0, 1.0, 1.0), Point3::new(5.0, 5.0, 5.0));
+    let ray_x = Ray::new(Point3::new(0.0f32, 2.0, 2.0), Vector3::new(1.0, 0.0, 0.0));
+    let ray_y = Ray::new(Point3::new(2.0f32, 0.0, 2.0), Vector3::new(0.0, 1.0, 0.0));
+    let ray_z = Ray::new(Point3::new(2.0f32, 2.0, 0.0), Vector3::new(0.0, 0.0, 1.0));
+
+    let ray_x2 = Ray::new(Point3::new(6.0f32, 2.0, 2.0), Vector3::new(-1.0, 0.0, 0.0));
+    let ray_y2 = Ray::new(Point3::new(2.0f32, 6.0, 2.0), Vector3::new(0.0, -1.0, 0.0));
+    let ray_z2 = Ray::new(Point3::new(2.0f32, 2.0, 6.0), Vector3::new(0.0, 0.0, -1.0));
+
+    assert_eq!((ray_x, aabb).intersection(),
+               Some(Point3::new(1.0, 2.0, 2.0)));
+    assert_eq!((ray_y, aabb).intersection(),
+               Some(Point3::new(2.0, 1.0, 2.0)));
+    assert_eq!((ray_z, aabb).intersection(),
+               Some(Point3::new(2.0, 2.0, 1.0)));
+
+    assert_eq!((ray_x2, aabb).intersection(),
+               Some(Point3::new(5.0, 2.0, 2.0)));
+    assert_eq!((ray_y2, aabb).intersection(),
+               Some(Point3::new(2.0, 5.0, 2.0)));
+    assert_eq!((ray_z2, aabb).intersection(),
+               Some(Point3::new(2.0, 2.0, 5.0)));
 }
 
 #[test]
