@@ -299,7 +299,7 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Ray3<S>, Aabb3<S>) {
         let mut tmin = t1.min(t2);
         let mut tmax = t1.max(t2);
 
-        for i in 0..3 {
+        for i in 1..3 {
             t1 = (aabb.min[i] - ray.origin[i]) * inv_dir[i];
             t2 = (aabb.max[i] - ray.origin[i]) * inv_dir[i];
 
