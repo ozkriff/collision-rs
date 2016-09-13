@@ -16,6 +16,7 @@ authors = ["Brendan Zabarauskas <bjzaba@yahoo.com.au>",
 license = "Apache-2.0"
 description = "A collision extension to cgmath"
 
+documentation = "https://docs.rs/collision"
 homepage = "https://github.com/csherratt/collision-rs"
 repository = "https://github.com/csherratt/collision-rs"
 readme = "README.md"
