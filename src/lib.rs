@@ -30,6 +30,9 @@
 //! `look_at`, `from_angle`, `from_euler`, and `from_axis_angle` methods.
 //! These are provided for convenience.
 
+#[macro_use]
+extern crate approx;
+
 extern crate cgmath;
 extern crate num;
 

@@ -16,13 +16,13 @@
 extern crate collision;
 extern crate cgmath;
 
-use cgmath::{Point3, PerspectiveFov, rad};
+use cgmath::{Point3, PerspectiveFov, Rad};
 use collision::{Projection, Relation, Sphere};
 
 #[test]
 fn test_contains() {
     let frustum = PerspectiveFov {
-        fovy: rad(1f32),
+        fovy: Rad(1f32),
         aspect: 1f32,
         near: 1f32,
         far: 10f32,

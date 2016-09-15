@@ -82,7 +82,7 @@ impl<S: BaseFloat> Plane<S> {
         // find the normal vector that is perpendicular to v1 and v2
         let n = v0.cross(v1);
 
-        if n.approx_eq(&Vector3::zero()) { None }
+        if ulps_eq!(n, &Vector3::zero()) { None }
         else {
             // compute the normal and the distance to the plane
             let n = n.normalize();
@@ -100,7 +100,7 @@ impl<S: BaseFloat> Plane<S> {
 
     /// Normalize a plane.
     pub fn normalize(&self) -> Option<Plane<S>> {
-        if self.n.approx_eq(&Vector3::zero()) { None }
+        if ulps_eq!(self.n, &Vector3::zero()) { None }
         else {
             let denom = S::one() / self.n.magnitude();
             Some(Plane::new(self.n * denom, self.d*denom))
@@ -109,14 +109,36 @@ impl<S: BaseFloat> Plane<S> {
 }
 
 impl<S> ApproxEq for Plane<S>
-    where S: BaseFloat + ApproxEq<Epsilon=S>
+    // where S: BaseFloat + ApproxEq<Epsilon=S>
+    where S: BaseFloat
 {
-    type Epsilon = S;
+    type Epsilon = S::Epsilon;
 
     #[inline]
-    fn approx_eq_eps(&self, other: &Plane<S>, epsilon: &S) -> bool {
-        self.n.approx_eq_eps(&other.n, epsilon) &&
-        self.d.approx_eq_eps(&other.d, epsilon)
+    fn default_epsilon() -> S::Epsilon {
+        S::default_epsilon()
+    }
+
+    #[inline]
+    fn default_max_relative() -> S::Epsilon {
+        S::default_max_relative()
+    }
+
+    #[inline]
+    fn default_max_ulps() -> u32 {
+        S::default_max_ulps()
+    }
+
+    #[inline]
+    fn relative_eq(&self, other: &Self, epsilon: S::Epsilon, max_relative: S::Epsilon) -> bool {
+        Vector3::relative_eq(&self.n, &other.n, epsilon, max_relative) &&
+        S::relative_eq(&self.d, &other.d, epsilon, max_relative)
+    }
+
+    #[inline]
+    fn ulps_eq(&self, other: &Self, epsilon: S::Epsilon, max_ulps: u32) -> bool {
+        Vector3::ulps_eq(&self.n, &other.n, epsilon, max_ulps) &&
+        S::ulps_eq(&self.d, &other.d, epsilon, max_ulps)
     }
 }
 

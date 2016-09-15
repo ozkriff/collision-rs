@@ -31,5 +31,6 @@ default = ["rustc-serialize"]
 
 [dependencies]
 num = "0.1"
-cgmath = "0.10.0"
+approx = "0.1"
+cgmath = "0.12.0"
 rustc-serialize = { version = "0.3", optional = true }

@@ -14,6 +14,9 @@
 // limitations under the License.
 
 
+#[macro_use]
+extern crate approx;
+
 extern crate cgmath;
 extern crate collision;
 
@@ -54,12 +57,12 @@ fn test_plane2_intersection() {
     assert!(ray.is_some());
 
     let ray = ray.unwrap();
-    assert!(ray.origin.x.approx_eq(&1.0f64));
-    assert!(ray.origin.y.approx_eq(&2.0f64));
-    assert!(ray.origin.z.approx_eq(&0.0f64));
-    assert!(ray.direction.x.approx_eq(&0.0f64));
-    assert!(ray.direction.y.approx_eq(&0.0f64));
-    assert!(ray.direction.z.approx_eq(&1.0f64));
+    assert_ulps_eq!(ray.origin.x, &1.0f64);
+    assert_ulps_eq!(ray.origin.y, &2.0f64);
+    assert_ulps_eq!(ray.origin.z, &0.0f64);
+    assert_ulps_eq!(ray.direction.x, &0.0f64);
+    assert_ulps_eq!(ray.direction.y, &0.0f64);
+    assert_ulps_eq!(ray.direction.z, &1.0f64);
 
     let p0 = Plane::new(Vector3::unit_y(), 1.0f64);
     let p1 = Plane::new(Vector3::unit_y(), 2.0f64);
@@ -76,9 +79,9 @@ fn test_plane3_intersection() {
     assert!(point.is_some());
 
     let point = point.unwrap();
-    assert!(point.x.approx_eq(&1.0f64));
-    assert!(point.y.approx_eq(&2.0f64));
-    assert!(point.z.approx_eq(&3.0f64));
+    assert_ulps_eq!(point.x, &1.0f64);
+    assert_ulps_eq!(point.y, &2.0f64);
+    assert_ulps_eq!(point.z, &3.0f64);
 
     let p0 = Plane::new(Vector3::unit_y(), 1.0f64);
     let p1 = Plane::new(Vector3::unit_y(), 2.0f64);

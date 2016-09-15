@@ -14,6 +14,9 @@
 // limitations under the License.
 
 
+#[macro_use]
+extern crate approx;
+
 extern crate cgmath;
 extern crate collision;
 
@@ -23,8 +26,8 @@ use collision::{Bound, Relation, Plane};
 
 #[test]
 fn test_homogeneous() {
-	let p = Point3::new(1.0f64, 2.0f64, 3.0f64);
-    assert!(p.approx_eq( &Point3::from_homogeneous(p.to_homogeneous()) ));
+    let p = Point3::new(1.0f64, 2.0f64, 3.0f64);
+    assert_ulps_eq!(p, &Point3::from_homogeneous(p.to_homogeneous()));
 }
 
 #[test]

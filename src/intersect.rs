@@ -39,7 +39,7 @@ impl<S: BaseFloat> Intersect<Option<Ray3<S>>> for (Plane<S>, Plane<S>) {
         let (p1, p2) = *self;
         let d = p1.n.cross(p2.n);
         let denom = d.dot(d);
-        if denom.approx_eq(&S::zero()) {
+        if ulps_eq!(denom, &S::zero()) {
             None
         }
         else {
@@ -55,7 +55,7 @@ impl<S: BaseFloat> Intersect<Option<Point3<S>>> for (Plane<S>, Plane<S>, Plane<S
         let (p1, p2, p3) = *self;
         let u = p2.n.cross(p3.n);
         let denom = p1.n.dot(u);
-        if denom.abs().approx_eq(&S::zero()) {
+        if ulps_eq!(denom.abs(), &S::zero()) {
             None
         }
         else {
